@@ -167,6 +167,31 @@ for dir in yum.YumBase().doConfigSetup(init_plugins=False).reposdir:
         ;;
 esac
 
+echo "Learning which repositories are enabled..."
+case "$os_version" in
+    8*)
+        enabled_repos=$(/usr/libexec/platform-python -c "
+import dnf
+
+base = dnf.Base()
+base.read_all_repos()
+for repo in base.repos.iter_enabled():
+  print(repo.id)
+")
+        ;;
+    *)
+        enabled_repos=$(python2 -c "
+import yum
+
+base = yum.YumBase()
+base.doConfigSetup(init_plugins=False)
+for repo in base.repos.listEnabled():
+  print repo
+")
+        ;;
+esac
+echo -e "Repositories enabled before update include:\n${enabled_repos}"
+
 if [ -z "${reposdir}" ]; then
     exit_message "Could not locate your repository directory."
 fi
