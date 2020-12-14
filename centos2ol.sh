@@ -306,21 +306,23 @@ case "$os_version" in
         # There are a few dnf modules that are named after the distribution
         #  for each steam named 'rhel' or 'rhel8' perform a module reset and install
         modules_enabled=($(dnf module list --enabled | grep rhel | cut -f1 -d\  ))
-        for module in "${modules_enabled[@]}"; do
-            dnf module reset -y "${module}"
-            case ${module} in
-            container-tools|go-toolset|jmc|llvm-toolset|rust-toolset)
-                dnf module install -y "${module}":ol8
-                ;;
-            virt)
-                dnf module install -y "${module}":ol
-                ;;
-            *)
-                echo "Unsure how to transform module ${module}"
-                ;;
-            esac
+        if [[ "${modules_enabled[@]}" ]]; then
+            for module in "${modules_enabled[@]}"; do
+                dnf module reset -y "${module}"
+                case ${module} in
+                container-tools|go-toolset|jmc|llvm-toolset|rust-toolset)
+                    dnf module install -y "${module}":ol8
+                    ;;
+                virt)
+                    dnf module install -y "${module}":ol
+                    ;;
+                *)
+                    echo "Unsure how to transform module ${module}"
+                    ;;
+                esac
+            done
             dnf update -y --disablerepo "*" --enablerepo "ol8_appstream"
-        done
+        fi
 
         # Two logo RPMs aren't currently covered by 'replaces' metadata, replace by hand.
         if rpm -q centos-logos-ipa; then
