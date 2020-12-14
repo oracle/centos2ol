@@ -102,12 +102,12 @@ case "$os_version" in
         new_releases=(oraclelinux-release oraclelinux-release-el8 redhat-release)
         base_packages=("${base_packages[@]}" plymouth grub2 grubby kernel-uek)
         ;;
-    7)
+    7*)
         repo_file=public-yum-ol7.repo
         new_releases=(oraclelinux-release oraclelinux-release-el7 redhat-release-server)
         base_packages=("${base_packages[@]}" plymouth grub2 grubby kernel-uek)
         ;;
-    6)
+    6*)
         repo_file=public-yum-ol6.repo
         new_releases=(oraclelinux-release oraclelinux-release-el6 redhat-release-server)
         base_packages=("${base_packages[@]}" oraclelinux-release-notes plymouth grub grubby kernel-uek)
