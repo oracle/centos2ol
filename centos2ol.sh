@@ -344,6 +344,6 @@ case "$os_version" in
 esac
 
 echo "Removing yum cache"
-yum clean all
+rm -rf /var/cache/yum
 
 echo "Switch complete. Oracle recommends rebooting this system."
