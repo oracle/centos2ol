@@ -323,14 +323,12 @@ trap - ERR
 case "$os_version" in
     6*)
         declare -A repositories=(
-            [base]="REPO ol6_u10_base"
             [base-debuginfo]="REPO https://oss.oracle.com/ol6/debuginfo/"
             [updates]="REPO ol6_latest"
         )
         ;;
     7*)
         declare -A repositories=(
-            [base]="REPO ol7_u9_base"
             [base-debuginfo]="REPO https://oss.oracle.com/ol7/debuginfo/"
             [updates]="REPO ol7_latest"
             [centos-ceph-jewel]="RPM oracle-ceph-release-el7"
