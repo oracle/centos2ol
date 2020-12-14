@@ -305,8 +305,8 @@ case "$os_version" in
     8*)
         # There are a few dnf modules that are named after the distribution
         #  for each steam named 'rhel' or 'rhel8' perform a module reset and install
-        modules_enabled=($(dnf module list --enabled | grep rhel | cut -f1 -d\  ))
-        if [[ "${modules_enabled[@]}" ]]; then
+        mapfile -t modules_enabled < <(dnf module list --enabled | grep rhel | cut -f1 -d\  )
+        if [[ "${modules_enabled[*]}" ]]; then
             for module in "${modules_enabled[@]}"; do
                 dnf module reset -y "${module}"
                 case ${module} in
