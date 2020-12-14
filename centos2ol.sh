@@ -279,6 +279,7 @@ fi
 
 echo "Backing up and removing old repository files..."
 rpm -ql "$old_release" | grep '\.repo$' > repo_files
+rpm -qla "centos-release-*" | grep '\.repo$' >> repo_files
 while read -r repo; do
     if [ -f "$repo" ]; then
         cat - "$repo" > "$repo".disabled <<EOF
