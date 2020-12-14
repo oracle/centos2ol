@@ -319,6 +319,7 @@ case "$os_version" in
                 echo "Unsure how to transform module ${module}"
                 ;;
             esac
+            dnf update -y --disablerepo "*" --enablerepo "ol8_appstream"
         done
 
         # Two logo RPMs aren't currently covered by 'replaces' metadata, replace by hand.
