@@ -297,6 +297,75 @@ rm -f "${reposdir}/switch-to-oraclelinux.repo"
 # At this point, the switch is completed.
 trap - ERR
 
+# When an additional enabled CentOS repository has a match with Oracle Linux
+#  then automatically enable the OL repository to ensure the RPM is maintained
+#
+# Create an associate array where the key is the CentOS reponame and the value
+#  contains the method of getting the content (Enable a repo or install an RPM)
+#  and the details of the repo or RPM
+case "$os_version" in
+    6*)
+        declare -A repositories=(
+            [base]="REPO ol6_u10_base"
+            [base-debuginfo]="REPO https://oss.oracle.com/ol6/debuginfo/"
+            [updates]="REPO ol6_latest"
+        )
+        ;;
+    7*)
+        declare -A repositories=(
+            [base]="REPO ol7_u9_base"
+            [base-debuginfo]="REPO https://oss.oracle.com/ol7/debuginfo/"
+            [updates]="REPO ol7_latest"
+            [centos-ceph-jewel]="RPM oracle-ceph-release-el7"
+            [centos-gluster41]="RPM oracle-gluster-release-el7"
+            [centos-gluster5]="RPM oracle-gluster-release-el7"
+            [centos-gluster46]="RPM oracle-gluster-release-el7"
+            [centos-nfs-ganesha30]="RPM oracle-gluster-release-el7"
+            [centos-ovirt42]="RPM oracle-ovirt-release-el7"
+            [centos-ovirt43]="RPM oracle-ovirt-release-el7"
+            [centos-sclo-sclo]="RPM oracle-softwarecollection-release-el7"
+            [centos-sclo-rh]="RPM oracle-softwarecollection-release-el7"
+        )
+        ;;
+    8*)
+        declare -A repositories=(
+            [AppStream]="REPO ol8_appstream"
+            [BaseOS]="REPO ol8_baseos_latest"
+            [HighAvailability]="REPO ol8_addons"
+            [PowerTools]="REPO ol8_codeready_builder"
+            [centos-release-nfs-ganesha28]="RPM oracle-gluster-release-el8"
+            [centos-gluster6-test]="RPM oracle-gluster-release-el8"
+            [centos-gluster7]="RPM oracle-gluster-release-el8"
+            [centos-gluster8]="RPM oracle-gluster-release-el8"
+        )
+        ;;
+esac
+
+# For each entry in the list, enable it
+for reponame in ${enabled_repos}; do
+    # action[0] will be REPO or RPM
+    # action[1] will be the repos details or the RPMs name
+    action=(${repositories[${reponame}]})
+    if [[ -n ${action[0]} ]]; then
+        if [ ${action[0]} == "REPO" ] ; then
+            matching_repo=${action[1]}
+            echo "Enabling ${matching_repo} which replaces ${reponame}"
+            # An RPM that describes debuginfo repository does not exist
+            #  check to see if the repo id starts with https, if it does then
+            #  create a new repo pointing to the repository
+            if [[ ${matching_repo} =~ https.* ]]; then
+                yum-config-manager --add-repo ${matching_repo}
+            else
+                yum-config-manager --enable ${matching_repo}
+            fi
+        elif [ ${action[0]} == "RPM" ] ; then
+            matching_rpm=${action[1]}
+            echo "Installing ${matching_rpm} to get content that replaces ${reponame}"
+            yum install -y ${matching_rpm}
+        fi
+    fi
+done
+
 echo "Installing base packages for Oracle Linux..."
 if ! yum shell -y <<EOF
 remove ${bad_packages[@]}
