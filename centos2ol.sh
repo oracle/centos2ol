@@ -305,16 +305,15 @@ case "$os_version" in
     8*)
         # There are a few dnf modules that are named after the distribution
         #  for each steam named 'rhel' or 'rhel8' perform a module reset and install
-        modules_enabled=$(dnf module list --enabled | grep rhel | cut -f1 -d\  )
-        # Workaround for qemu-guest-agent packages installed from virt modules
-        for module in ${modules_enabled[@]}; do
-            dnf module reset -y ${module}
+        modules_enabled=($(dnf module list --enabled | grep rhel | cut -f1 -d\  ))
+        for module in "${modules_enabled[@]}"; do
+            dnf module reset -y "${module}"
             case ${module} in
             container-tools|go-toolset|jmc|llvm-toolset|rust-toolset)
-                dnf module install -y ${module}:ol8
+                dnf module install -y "${module}":ol8
                 ;;
             virt)
-                dnf module install -y virt:ol
+                dnf module install -y "${module}":ol
                 ;;
             *)
                 echo "Unsure how to transform module ${module}"
