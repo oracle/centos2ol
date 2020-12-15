@@ -281,7 +281,7 @@ echo "Backing up and removing old repository files..."
 # Identify repo files from the base OS
 rpm -ql "$old_release" | grep '\.repo$' > repo_files
 # Identify repo files from 'CentOS extras'
-if [ $(rpm -qa "centos-release-*" | wc -l) -gt 0 ] ; then
+if [ "$(rpm -qa "centos-release-*" | wc -l)" -gt 0 ] ; then
     rpm -qla "centos-release-*" | grep '\.repo$' >> repo_files
 fi
 while read -r repo; do
@@ -364,23 +364,24 @@ esac
 for reponame in ${enabled_repos}; do
     # action[0] will be REPO or RPM
     # action[1] will be the repos details or the RPMs name
-    action=(${repositories[${reponame}]})
+    IFS=" " read -r -a action <<< "${repositories[${reponame}]}"
+    # action=(${repositories[${reponame}]})
     if [[ -n ${action[0]} ]]; then
-        if [ ${action[0]} == "REPO" ] ; then
+        if [ "${action[0]}" == "REPO" ] ; then
             matching_repo=${action[1]}
             echo "Enabling ${matching_repo} which replaces ${reponame}"
             # An RPM that describes debuginfo repository does not exist
             #  check to see if the repo id starts with https, if it does then
             #  create a new repo pointing to the repository
             if [[ ${matching_repo} =~ https.* ]]; then
-                yum-config-manager --add-repo ${matching_repo}
+                yum-config-manager --add-repo "${matching_repo}"
             else
-                yum-config-manager --enable ${matching_repo}
+                yum-config-manager --enable "${matching_repo}"
             fi
-        elif [ ${action[0]} == "RPM" ] ; then
+        elif [ "${action[0]}" == "RPM" ] ; then
             matching_rpm=${action[1]}
             echo "Installing ${matching_rpm} to get content that replaces ${reponame}"
-            yum install -y ${matching_rpm}  --disablerepo "*" --enablerepo "ol*_latest"
+            yum install -y "${matching_rpm}"  --disablerepo "*" --enablerepo "ol*_latest"
         fi
     fi
 done
