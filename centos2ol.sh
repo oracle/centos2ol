@@ -305,7 +305,7 @@ case "$os_version" in
     8*)
         # There are a few dnf modules that are named after the distribution
         #  for each steam named 'rhel' or 'rhel8' perform a module reset and install
-        mapfile -t modules_enabled < <(dnf module list --enabled | grep rhel | cut -f1 -d\  )
+        mapfile -t modules_enabled < <(dnf module list --enabled | grep rhel | awk '{print $1}')
         if [[ "${modules_enabled[*]}" ]]; then
             for module in "${modules_enabled[@]}"; do
                 dnf module reset -y "${module}"
@@ -321,7 +321,7 @@ case "$os_version" in
                     ;;
                 esac
             done
-            dnf update -y --disablerepo "*" --enablerepo "ol8_appstream"
+            dnf --assumeyes --disablerepo "*" --enablerepo "ol8_appstream" update
         fi
 
         # Two logo RPMs aren't currently covered by 'replaces' metadata, replace by hand.
