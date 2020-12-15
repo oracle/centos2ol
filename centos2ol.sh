@@ -278,8 +278,12 @@ if [[ $old_release =~ ^centos-release-8.* ]] || [[ $old_release =~ ^centos-linux
 fi
 
 echo "Backing up and removing old repository files..."
+# Identify repo files from the base OS
 rpm -ql "$old_release" | grep '\.repo$' > repo_files
-rpm -qla "centos-release-*" | grep '\.repo$' >> repo_files
+# Identify repo files from 'CentOS extras'
+if [ $(rpm -qa "centos-release-*" | wc -l) -gt 0 ] ; then
+    rpm -qla "centos-release-*" | grep '\.repo$' >> repo_files
+fi
 while read -r repo; do
     if [ -f "$repo" ]; then
         cat - "$repo" > "$repo".disabled <<EOF
