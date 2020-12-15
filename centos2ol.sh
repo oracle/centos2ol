@@ -380,7 +380,7 @@ for reponame in ${enabled_repos}; do
         elif [ "${action[0]}" == "RPM" ] ; then
             matching_rpm=${action[1]}
             echo "Installing ${matching_rpm} to get content that replaces ${reponame}"
-            yum install --assumeyes "${matching_rpm}"  --disablerepo "*" --enablerepo "ol*_latest"
+            yum --assumeyes --disablerepo "*" --enablerepo "ol*_latest" install "${matching_rpm}"
         fi
     fi
 done
