@@ -12,6 +12,22 @@ unset CDPATH
 yum_url=https://yum.oracle.com
 contact_email=oraclelinux-info_ww_grp@oracle.com
 bad_packages=(centos-backgrounds centos-logos centos-release centos-release-cr desktop-backgrounds-basic \
+              centos-release-advanced-virtualization centos-release-ansible26 centos-release-ansible-27 \
+              centos-release-ansible-28 centos-release-ansible-29 centos-release-azure \
+              centos-release-ceph-jewel centos-release-ceph-luminous centos-release-ceph-nautilus \
+              centos-release-ceph-octopus centos-release-configmanagement centos-release-dotnet centos-release-fdio \
+              centos-release-gluster40 centos-release-gluster41 centos-release-gluster5 \
+              centos-release-gluster6 centos-release-gluster7 centos-release-gluster8 \
+              centos-release-gluster-legacy centos-release-messaging centos-release-nfs-ganesha28 \
+              centos-release-nfs-ganesha30 centos-release-nfv-common \
+              centos-release-nfv-openvswitch centos-release-openshift-origin centos-release-openstack-queens \
+              centos-release-openstack-rocky centos-release-openstack-stein centos-release-openstack-train \
+              centos-release-openstack-ussuri centos-release-opstools centos-release-ovirt42 centos-release-ovirt43 \
+              centos-release-ovirt44 centos-release-paas-common centos-release-qemu-ev centos-release-qpid-proton \
+              centos-release-rabbitmq-38 centos-release-samba411 centos-release-samba412 \
+              centos-release-scl centos-release-scl-rh centos-release-storage-common \
+              centos-release-virt-common centos-release-xen centos-release-xen-410 \
+              centos-release-xen-412 centos-release-xen-46 centos-release-xen-48 centos-release-xen-common \
               libreport-centos libreport-plugin-mantisbt libreport-plugin-rhtsupport python3-syspurpose \
               python-oauth sl-logos yum-rhn-plugin)
 
@@ -167,6 +183,31 @@ for dir in yum.YumBase().doConfigSetup(init_plugins=False).reposdir:
         ;;
 esac
 
+echo "Learning which repositories are enabled..."
+case "$os_version" in
+    8*)
+        enabled_repos=$(/usr/libexec/platform-python -c "
+import dnf
+
+base = dnf.Base()
+base.read_all_repos()
+for repo in base.repos.iter_enabled():
+  print(repo.id)
+")
+        ;;
+    *)
+        enabled_repos=$(python2 -c "
+import yum
+
+base = yum.YumBase()
+base.doConfigSetup(init_plugins=False)
+for repo in base.repos.listEnabled():
+  print repo
+")
+        ;;
+esac
+echo -e "Repositories enabled before update include:\n${enabled_repos}"
+
 if [ -z "${reposdir}" ]; then
     exit_message "Could not locate your repository directory."
 fi
@@ -237,7 +278,12 @@ if [[ $old_release =~ ^centos-release-8.* ]] || [[ $old_release =~ ^centos-linux
 fi
 
 echo "Backing up and removing old repository files..."
+# Identify repo files from the base OS
 rpm -ql "$old_release" | grep '\.repo$' > repo_files
+# Identify repo files from 'CentOS extras'
+if [ "$(rpm -qa "centos-release-*" | wc -l)" -gt 0 ] ; then
+    rpm -qla "centos-release-*" | grep '\.repo$' >> repo_files
+fi
 while read -r repo; do
     if [ -f "$repo" ]; then
         cat - "$repo" > "$repo".disabled <<EOF
@@ -271,6 +317,73 @@ rm -f "${reposdir}/switch-to-oraclelinux.repo"
 
 # At this point, the switch is completed.
 trap - ERR
+
+# When an additional enabled CentOS repository has a match with Oracle Linux
+#  then automatically enable the OL repository to ensure the RPM is maintained
+#
+# Create an associate array where the key is the CentOS reponame and the value
+#  contains the method of getting the content (Enable a repo or install an RPM)
+#  and the details of the repo or RPM
+case "$os_version" in
+    6*)
+        declare -A repositories=(
+            [base-debuginfo]="REPO https://oss.oracle.com/ol6/debuginfo/"
+            [updates]="REPO ol6_latest"
+        )
+        ;;
+    7*)
+        declare -A repositories=(
+            [base-debuginfo]="REPO https://oss.oracle.com/ol7/debuginfo/"
+            [updates]="REPO ol7_latest"
+            [centos-ceph-jewel]="RPM oracle-ceph-release-el7"
+            [centos-gluster41]="RPM oracle-gluster-release-el7"
+            [centos-gluster5]="RPM oracle-gluster-release-el7"
+            [centos-gluster46]="RPM oracle-gluster-release-el7"
+            [centos-nfs-ganesha30]="RPM oracle-gluster-release-el7"
+            [centos-ovirt42]="RPM oracle-ovirt-release-el7"
+            [centos-ovirt43]="RPM oracle-ovirt-release-el7"
+            [centos-sclo-sclo]="RPM oracle-softwarecollection-release-el7"
+            [centos-sclo-rh]="RPM oracle-softwarecollection-release-el7"
+        )
+        ;;
+    8*)
+        declare -A repositories=(
+            [AppStream]="REPO ol8_appstream"
+            [BaseOS]="REPO ol8_baseos_latest"
+            [HighAvailability]="REPO ol8_addons"
+            [PowerTools]="REPO ol8_codeready_builder"
+            [centos-release-nfs-ganesha28]="RPM oracle-gluster-release-el8"
+            [centos-gluster6-test]="RPM oracle-gluster-release-el8"
+            [centos-gluster7]="RPM oracle-gluster-release-el8"
+            [centos-gluster8]="RPM oracle-gluster-release-el8"
+        )
+        ;;
+esac
+
+# For each entry in the list, enable it
+for reponame in ${enabled_repos}; do
+    # action[0] will be REPO or RPM
+    # action[1] will be the repos details or the RPMs name
+    IFS=" " read -r -a action <<< "${repositories[${reponame}]}"
+    if [[ -n ${action[0]} ]]; then
+        if [ "${action[0]}" == "REPO" ] ; then
+            matching_repo=${action[1]}
+            echo "Enabling ${matching_repo} which replaces ${reponame}"
+            # An RPM that describes debuginfo repository does not exist
+            #  check to see if the repo id starts with https, if it does then
+            #  create a new repo pointing to the repository
+            if [[ ${matching_repo} =~ https.* ]]; then
+                yum-config-manager --add-repo "${matching_repo}"
+            else
+                yum-config-manager --enable "${matching_repo}"
+            fi
+        elif [ "${action[0]}" == "RPM" ] ; then
+            matching_rpm=${action[1]}
+            echo "Installing ${matching_rpm} to get content that replaces ${reponame}"
+            yum --assumeyes --disablerepo "*" --enablerepo "ol*_latest" install "${matching_rpm}"
+        fi
+    fi
+done
 
 echo "Installing base packages for Oracle Linux..."
 if ! yum shell -y <<EOF
