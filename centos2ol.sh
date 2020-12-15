@@ -157,7 +157,7 @@ if [[ "$os_version" =~ 8.* ]]; then
                 *)
                     echo "This tool is unable to automatically switch module '${module}' from a CentOS 'rhel' stream to
 an Oracle Linux equivalent. Do you want to continue and resolve it manually?
-You may want select No to stop and raise an issue on ${github_url} or contact <${contact_email}> for advice."
+You may want select No to stop and raise an issue on ${github_url} for advice."
                     select yn in "Yes" "No"; do
                         case $yn in
                             Yes )
