@@ -11,6 +11,7 @@ unset CDPATH
 
 yum_url=https://yum.oracle.com
 contact_email=oraclelinux-info_ww_grp@oracle.com
+github_url=https://github.com/oracle/centos2ol/
 bad_packages=(centos-backgrounds centos-logos centos-release centos-release-cr desktop-backgrounds-basic \
               libreport-centos libreport-plugin-mantisbt libreport-plugin-rhtsupport python3-syspurpose \
               python-oauth sl-logos yum-rhn-plugin)
@@ -141,6 +142,37 @@ case "$os_version" in
         dep_check python2
         ;;
 esac
+
+if [[ "$os_version" =~ 8.* ]]; then
+    echo "Identifying dnf modules that are enabled"
+    # There are a few dnf modules that are named after the distribution
+    #  for each steam named 'rhel' or 'rhel8' we need to make alterations to 'ol' or 'ol8'
+    #  Before we start the switch, identify if there are any present we don't know how to handle
+    mapfile -t modules_enabled < <(dnf module list --enabled | grep rhel | awk '{print $1}')
+    if [[ "${modules_enabled[*]}" ]]; then
+        for module in "${modules_enabled[@]}"; do
+            case ${module} in
+                container-tools|go-toolset|jmc|llvm-toolset|rust-toolset|virt)
+                    ;;
+                *)
+                    echo "This tool is unable to automatically switch module ${module} from a CentOS 'rhel' stream to
+an Oracle Linux equivalent. Do you want to continue and resolve it manually?
+You may want select No to stop and raise an issue on ${github_url} or contact <${contact_email}> for advice."
+                    select yn in "Yes" "No"; do
+                        case $yn in
+                            Yes )
+                                break
+                                ;;
+                            No )
+                                exit_message "Unsure how to process module ${module}"
+                                ;;
+                        esac
+                    done
+                    ;;
+            esac
+        done
+    fi
+fi
 
 echo "Finding your repository directory..."
 case "$os_version" in
@@ -305,7 +337,6 @@ case "$os_version" in
     8*)
         # There are a few dnf modules that are named after the distribution
         #  for each steam named 'rhel' or 'rhel8' perform a module reset and install
-        mapfile -t modules_enabled < <(dnf module list --enabled | grep rhel | awk '{print $1}')
         if [[ "${modules_enabled[*]}" ]]; then
             for module in "${modules_enabled[@]}"; do
                 dnf module reset -y "${module}"
