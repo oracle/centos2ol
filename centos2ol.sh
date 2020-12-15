@@ -365,7 +365,6 @@ for reponame in ${enabled_repos}; do
     # action[0] will be REPO or RPM
     # action[1] will be the repos details or the RPMs name
     IFS=" " read -r -a action <<< "${repositories[${reponame}]}"
-    # action=(${repositories[${reponame}]})
     if [[ -n ${action[0]} ]]; then
         if [ "${action[0]}" == "REPO" ] ; then
             matching_repo=${action[1]}
