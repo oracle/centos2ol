@@ -173,7 +173,8 @@ You may want select No to stop and raise an issue on ${github_url} for advice."
                         break
                         ;;
                     No )
-                        exit_message "Unsure how to switch module(s) '${unknown_modules[*]}'. Exiting as requested"
+                        echo "Unsure how to switch module(s) '${unknown_modules[*]}'. Exiting as requested"
+                        exit 1
                         ;;
                 esac
             done
