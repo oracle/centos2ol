@@ -155,7 +155,7 @@ if [[ "$os_version" =~ 8.* ]]; then
                 container-tools|go-toolset|jmc|llvm-toolset|rust-toolset|virt)
                     ;;
                 *)
-                    echo "This tool is unable to automatically switch module ${module} from a CentOS 'rhel' stream to
+                    echo "This tool is unable to automatically switch module '${module}' from a CentOS 'rhel' stream to
 an Oracle Linux equivalent. Do you want to continue and resolve it manually?
 You may want select No to stop and raise an issue on ${github_url} or contact <${contact_email}> for advice."
                     select yn in "Yes" "No"; do
@@ -164,7 +164,7 @@ You may want select No to stop and raise an issue on ${github_url} or contact <$
                                 break
                                 ;;
                             No )
-                                exit_message "Unsure how to process module ${module}"
+                                exit_message "Unsure how to switch module '${module}'. Exiting as requested"
                                 ;;
                         esac
                     done
