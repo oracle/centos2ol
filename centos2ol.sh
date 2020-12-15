@@ -150,27 +150,34 @@ if [[ "$os_version" =~ 8.* ]]; then
     #  Before we start the switch, identify if there are any present we don't know how to handle
     mapfile -t modules_enabled < <(dnf module list --enabled | grep rhel | awk '{print $1}')
     if [[ "${modules_enabled[*]}" ]]; then
+        # Create an array of modules we don't know how to manage
+        unknown_modules=()
         for module in "${modules_enabled[@]}"; do
             case ${module} in
                 container-tools|go-toolset|jmc|llvm-toolset|rust-toolset|virt)
                     ;;
                 *)
-                    echo "This tool is unable to automatically switch module '${module}' from a CentOS 'rhel' stream to
-an Oracle Linux equivalent. Do you want to continue and resolve it manually?
-You may want select No to stop and raise an issue on ${github_url} for advice."
-                    select yn in "Yes" "No"; do
-                        case $yn in
-                            Yes )
-                                break
-                                ;;
-                            No )
-                                exit_message "Unsure how to switch module '${module}'. Exiting as requested"
-                                ;;
-                        esac
-                    done
+                    # Add this module name to our array of modules we don't know how to manage
+                    unknown_modules+=("${module}")
                     ;;
             esac
         done
+        # If we have any modules we don't know how to manage, ask the user how to proceed
+        if [ ${#unknown_modules[@]} -gt 0 ]; then
+            echo "This tool is unable to automatically switch module(s) '${unknown_modules[*]}' from a CentOS 'rhel' stream to
+an Oracle Linux equivalent. Do you want to continue and resolve it manually?
+You may want select No to stop and raise an issue on ${github_url} for advice."
+            select yn in "Yes" "No"; do
+                case $yn in
+                    Yes )
+                        break
+                        ;;
+                    No )
+                        exit_message "Unsure how to switch module(s) '${unknown_modules[*]}'. Exiting as requested"
+                        ;;
+                esac
+            done
+        fi
     fi
 fi
 
