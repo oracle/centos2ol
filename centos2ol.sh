@@ -38,6 +38,9 @@ usage() {
     echo "OPTIONS"
     echo "-h"
     echo "        Display this help and exit"
+    echo "-r"
+    echo "        Reinstall all CentOS RPMs with Oracle Linux RPMs"
+    echo "        Note: This is not necessary for support"
     exit 1
 } >&2
 
@@ -72,9 +75,12 @@ Your repositories have been restored to your previous configuration."
 
 ## Start of script
 
-while getopts "h" option; do
+reinstall_all_rpms=false
+
+while getopts "h:r" option; do
     case "$option" in
         h) usage ;;
+        r) reinstall_all_rpms=true ;;
         *) usage ;;
     esac
 done
@@ -485,6 +491,26 @@ case "$os_version" in
         fi
         ;;
 esac
+
+if "${reinstall_all_rpms}"; then
+    echo "Testing for remaining CentOS RPMs"
+    # If CentOS and Oracle Linux have identically versioned RPMs then those RPMs are left unchanged.
+    #  This should have no technical impact but for completeness, reinstall these RPMs
+    #  so there is no accidental cross pollination.
+    mapfile -t list_of_centos_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE} %{VENDOR}\n" | grep CentOS | awk '{print $1}')
+    if [[ -n "${list_of_centos_rpms[*]}" ]]; then
+        echo "Reinstalling RPMs: ${list_of_centos_rpms[*]}"
+        yum --assumeyes --disablerepo "*" --enablerepo "ol*" reinstall "${list_of_centos_rpms[@]}"
+    fi
+    # See if non-Oracle RPMs are present and print them
+    mapfile -t non_oracle_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE}|%{VENDOR}|%{PACKAGER}\n" |grep -v Oracle)
+    if [[ -n "${non_oracle_rpms[*]}" ]]; then
+        echo "The following non-Oracle RPMs are installed on the system:"
+        printf '\t%s\n' "${non_oracle_rpms[@]}"
+        echo "This may be expected of your environment and does not necessarily indicate a problem."
+        echo "If a large number of CentOS RPMs are included and you're unsure why please open an issue on ${github_url}"
+    fi
+fi
 
 echo "Sync successful. Switching default kernel to the UEK."
 
