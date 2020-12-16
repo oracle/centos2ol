@@ -30,6 +30,15 @@ CentOS Linux 8. It does not support CentOS Stream.
 1. Either clone this repository or download the [`centos2ol.sh`](./centos2ol.sh) script.
 1. Run `sudo bash centos2ol.sh` to switch your CentOS instance to Oracle Linux.
 
+### Usage options
+* `-r` Reinstalls all CentOS RPMs with Oracle Linux RPMs
+
+   If a system is swiched to Oracle Linux and there is no newer Oracle Linux version
+   of a package already installed then the CentOS version remains.
+   This option proceeds to reinstall any CentOS RPM with an identical version from
+   Oracle Linunx. This is not necessary for support and has no impact to a systems functionality
+   but is offered so a user can remove CentOS GPG keys from the truststore.
+
 ## Limitations
 
 1. The script currently needs to be able communicate with the CentOS and Oracle
