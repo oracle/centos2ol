@@ -38,6 +38,7 @@ CentOS Linux 8. It does not support CentOS Stream.
    This option proceeds to reinstall any CentOS RPM with an identical version from
    Oracle Linunx. This is not necessary for support and has no impact to a systems functionality
    but is offered so a user can remove CentOS GPG keys from the truststore.
+   A list of all non-Oracle RPMs will be displayed after the reinstall process.
 
 ## Limitations
 
