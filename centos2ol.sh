@@ -486,6 +486,22 @@ case "$os_version" in
         ;;
 esac
 
+echo "Testing for remaining CentOS RPMs"
+# If CentOS and Oracle Linux have identically versioned RPMs then those RPMs are left unchanged.
+#  This should have no technical impact but for completeness, reinstall these RPMs
+#  so there is no accidental cross pollination.
+mapfile -t list_of_centos_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE} %{VENDOR}\n" | grep CentOS | awk '{print $1}')
+if [[ -n ${list_of_centos_rpms[*]} ]]; then
+    echo "Reinstalling RPMs: ${list_of_centos_rpms[*]}"
+    yum -y reinstall "${list_of_centos_rpms[@]}"
+fi
+mapfile -t non_oracle_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE}|%{VENDOR}|%{PACKAGER}\n" |grep CentOS)
+if [[ ${non_oracle_rpms[*]} ]]; then
+    echo "The following CentOS RPMs are still installed on the system:"
+    printf '\t%s\n' "${non_oracle_rpms[@]}"
+    echo "This does not necessarily indicate a problem."
+fi
+
 echo "Sync successful. Switching default kernel to the UEK."
 
 arch=$(uname -m)
