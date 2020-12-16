@@ -75,12 +75,12 @@ Your repositories have been restored to your previous configuration."
 
 ## Start of script
 
-reinstall_all_rpms=False
+reinstall_all_rpms=false
 
 while getopts "h:r" option; do
     case "$option" in
         h) usage ;;
-        r) reinstall_all_rpms=True ;;
+        r) reinstall_all_rpms=true ;;
         *) usage ;;
     esac
 done
@@ -492,7 +492,7 @@ case "$os_version" in
         ;;
 esac
 
-if [ "${reinstall_all_rpms}" ]; then
+if "${reinstall_all_rpms}"; then
     echo "Testing for remaining CentOS RPMs"
     # If CentOS and Oracle Linux have identically versioned RPMs then those RPMs are left unchanged.
     #  This should have no technical impact but for completeness, reinstall these RPMs
