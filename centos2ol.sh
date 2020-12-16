@@ -10,7 +10,6 @@ set -e
 unset CDPATH
 
 yum_url=https://yum.oracle.com
-contact_email=oraclelinux-info_ww_grp@oracle.com
 github_url=https://github.com/oracle/centos2ol/
 bad_packages=(centos-backgrounds centos-logos centos-release centos-release-cr desktop-backgrounds-basic \
               centos-release-advanced-virtualization centos-release-ansible26 centos-release-ansible-27 \
@@ -56,7 +55,7 @@ dep_check() {
 
 exit_message() {
     echo "$1"
-    echo "For assistance, please email <${contact_email}>."
+    echo "For assistance, please open an issue via GitHub: ${github_url}."
     exit 1
 } >&2
 
@@ -317,7 +316,7 @@ fi
 cd "$(mktemp -d)"
 trap restore_repos ERR
 
-# Most distros keep their /etc/yum.repos.d content in the -release rpm. CentOS 8 does not and the behaviour changes between 
+# Most distros keep their /etc/yum.repos.d content in the -release rpm. CentOS 8 does not and the behaviour changes between
 #  minor releases; 8.0 uses 'centos-repos' while 8.3 uses 'centos-linux-repos', glob for simplicity.
 if [[ $old_release =~ ^centos-release-8.* ]] || [[ $old_release =~ ^centos-linux-release-8.* ]]; then
     old_release=$(rpm -qa centos*repos)
