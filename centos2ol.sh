@@ -491,15 +491,16 @@ echo "Testing for remaining CentOS RPMs"
 #  This should have no technical impact but for completeness, reinstall these RPMs
 #  so there is no accidental cross pollination.
 mapfile -t list_of_centos_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE} %{VENDOR}\n" | grep CentOS | awk '{print $1}')
-if [[ -n ${list_of_centos_rpms[*]} ]]; then
+if [[ -n "${list_of_centos_rpms[*]}" ]]; then
     echo "Reinstalling RPMs: ${list_of_centos_rpms[*]}"
     yum -y reinstall "${list_of_centos_rpms[@]}"
 fi
-mapfile -t non_oracle_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE}|%{VENDOR}|%{PACKAGER}\n" |grep CentOS)
-if [[ ${non_oracle_rpms[*]} ]]; then
-    echo "The following CentOS RPMs are still installed on the system:"
+mapfile -t non_oracle_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE}|%{VENDOR}|%{PACKAGER}\n" |grep -v Oracle)
+if [[ -n "${non_oracle_rpms[*]}" ]]; then
+    echo "The following non-Oracle RPMs are installed on the system:"
     printf '\t%s\n' "${non_oracle_rpms[@]}"
-    echo "This does not necessarily indicate a problem."
+    echo "This may be expected of your environment and does not necessarily indicate a problem."
+    echo "If a large number of CentOS RPMs are included and you're unsure why please open an issue on ${github_url}"
 fi
 
 echo "Sync successful. Switching default kernel to the UEK."
