@@ -11,6 +11,7 @@ unset CDPATH
 
 yum_url=https://yum.oracle.com
 contact_email=oraclelinux-info_ww_grp@oracle.com
+github_url=https://github.com/oracle/centos2ol/
 bad_packages=(centos-backgrounds centos-logos centos-release centos-release-cr desktop-backgrounds-basic \
               centos-release-advanced-virtualization centos-release-ansible26 centos-release-ansible-27 \
               centos-release-ansible-28 centos-release-ansible-29 centos-release-azure \
@@ -157,6 +158,45 @@ case "$os_version" in
         dep_check python2
         ;;
 esac
+
+if [[ "$os_version" =~ 8.* ]]; then
+    echo "Identifying dnf modules that are enabled"
+    # There are a few dnf modules that are named after the distribution
+    #  for each steam named 'rhel' or 'rhel8' we need to make alterations to 'ol' or 'ol8'
+    #  Before we start the switch, identify if there are any present we don't know how to handle
+    mapfile -t modules_enabled < <(dnf module list --enabled | grep rhel | awk '{print $1}')
+    if [[ "${modules_enabled[*]}" ]]; then
+        # Create an array of modules we don't know how to manage
+        unknown_modules=()
+        for module in "${modules_enabled[@]}"; do
+            case ${module} in
+                container-tools|go-toolset|jmc|llvm-toolset|rust-toolset|virt)
+                    ;;
+                *)
+                    # Add this module name to our array of modules we don't know how to manage
+                    unknown_modules+=("${module}")
+                    ;;
+            esac
+        done
+        # If we have any modules we don't know how to manage, ask the user how to proceed
+        if [ ${#unknown_modules[@]} -gt 0 ]; then
+            echo "This tool is unable to automatically switch module(s) '${unknown_modules[*]}' from a CentOS 'rhel' stream to
+an Oracle Linux equivalent. Do you want to continue and resolve it manually?
+You may want select No to stop and raise an issue on ${github_url} for advice."
+            select yn in "Yes" "No"; do
+                case $yn in
+                    Yes )
+                        break
+                        ;;
+                    No )
+                        echo "Unsure how to switch module(s) '${unknown_modules[*]}'. Exiting as requested"
+                        exit 1
+                        ;;
+                esac
+            done
+        fi
+    fi
+fi
 
 echo "Finding your repository directory..."
 case "$os_version" in
@@ -416,11 +456,24 @@ case "$os_version" in
         fi
         ;;
     8*)
-        # Workaround for qemu-guest-agent packages installed from virt modules
-        if rpm -q qemu-guest-agent; then
-            dnf module reset -y virt
-            dnf module enable -y virt
-            dnf install -y --allowerasing qemu-guest-agent
+        # There are a few dnf modules that are named after the distribution
+        #  for each steam named 'rhel' or 'rhel8' perform a module reset and install
+        if [[ "${modules_enabled[*]}" ]]; then
+            for module in "${modules_enabled[@]}"; do
+                dnf module reset -y "${module}"
+                case ${module} in
+                container-tools|go-toolset|jmc|llvm-toolset|rust-toolset)
+                    dnf module install -y "${module}":ol8
+                    ;;
+                virt)
+                    dnf module install -y "${module}":ol
+                    ;;
+                *)
+                    echo "Unsure how to transform module ${module}"
+                    ;;
+                esac
+            done
+            dnf --assumeyes --disablerepo "*" --enablerepo "ol8_appstream" update
         fi
 
         # Two logo RPMs aren't currently covered by 'replaces' metadata, replace by hand.
