@@ -64,7 +64,7 @@ CentOS Linux 8. It does not support CentOS Stream.
    updates for packages already installed (see [issue #1](https://github.com/oracle/centos2ol/issues/1)).
 
 ## Debugging
-Run `sudo bash -x centos2ol.sh` to switch your CentOS instance to Oracle Linux in a debug mode. This will print a trace of commands and their arguments or associated word lists after they are expanded but before they are executed.
+Run `sudo bash -x centos2ol.sh` to switch your CentOS instance to Oracle Linux in debug mode. This will print a trace of commands and their arguments or associated word lists after they are expanded but before they are executed.
 
 ## Get involved
 
