@@ -46,7 +46,7 @@ CentOS Linux 8. It does not support CentOS Stream.
    * sorted list of installed RPMs before the switch
    * sorted list of installed RPMs after the switch
    * result of verification of all installed RPMs against the RPM database before the switch
-   * result of verification of all installed RPMs sgainst the RPM database after the switch
+   * result of verification of all installed RPMs against the RPM database after the switch
 
 ## Limitations
 
