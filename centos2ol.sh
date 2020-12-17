@@ -558,7 +558,7 @@ rm -rf /var/cache/{yum,dnf}
 if "${verify_all_rpms}"; then
     generate_rpms_info after
     echo "Review the output of following files:"
-    find /var/tmp/ -type f -name "`hostname`-rpms-*.log"
+    find /var/tmp/ -type f -name "$(hostname)-rpms-*.log"
 fi
 
 echo "Switch complete. Oracle recommends rebooting this system."
