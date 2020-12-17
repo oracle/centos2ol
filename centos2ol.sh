@@ -40,6 +40,8 @@ usage() {
     echo "-r"
     echo "        Reinstall all CentOS RPMs with Oracle Linux RPMs"
     echo "        Note: This is not necessary for support"
+    echo "-V"
+    echo "        Verify RPM information before and after the switch"
     exit 1
 } >&2
 
@@ -72,14 +74,24 @@ restore_repos() {
 Your repositories have been restored to your previous configuration."
 }
 
+generate_rpms_info() {
+    echo "Creating a list of RPMs installed $1 the switch"
+    rpm -qa --qf "%{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}\n" | sort > /var/tmp/`hostname`-rpms-list-"$1".log
+    echo "Verifing RPMs installed $1 the switch agains RPM database"
+    rpm -Va | sort -k3 > /var/tmp/`hostname`-rpms-verified-"$1".log
+}
+
 ## Start of script
 
 reinstall_all_rpms=false
 
-while getopts "h:r" option; do
+verify_all_rpms=false
+
+while getopts "h:r:V" option; do
     case "$option" in
         h) usage ;;
         r) reinstall_all_rpms=true ;;
+	V) verify_all_rpms=true ;;
         *) usage ;;
     esac
 done
@@ -104,6 +116,11 @@ if [ "$(echo "${old_release}" | wc -l)" -ne 1 ]; then
 packages are providing redhat-release:
 $old_release
 "
+fi
+
+# Collect information about RPMs before the switch
+if "${verify_all_rpms}"; then
+    generate_rpms_info before
 fi
 
 case "${old_release}" in
@@ -536,5 +553,12 @@ esac
 
 echo "Removing yum cache"
 rm -rf /var/cache/{yum,dnf}
+
+# Collect information about RPMs after the switch
+if "${verify_all_rpms}"; then
+    generate_rpms_info after
+    echo "Review the output of following files:"
+    find /var/tmp/ -type f -name "`hostname`-rpms-*.log"
+fi
 
 echo "Switch complete. Oracle recommends rebooting this system."
