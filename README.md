@@ -39,6 +39,14 @@ CentOS Linux 8. It does not support CentOS Stream.
    Oracle Linunx. This is not necessary for support and has no impact to a systems functionality
    but is offered so a user can remove CentOS GPG keys from the truststore.
    A list of all non-Oracle RPMs will be displayed after the reinstall process.
+   
+* `-V` Verify RPM information before and after the switch
+
+   This option creates four output files:
+   * sorted list of installed RPMs before the switch
+   * sorted list of installed RPMs after the switch
+   * result of verification of all installed RPMs sgainst the RPM database before the switch
+   * result of verification of all installed RPMs sgainst the RPM database after the switch
 
 ## Limitations
 
@@ -54,6 +62,9 @@ CentOS Linux 8. It does not support CentOS Stream.
 1. The script only enables the base repositories required to enable switching
    to Oracle Linux. Users may need to enable additional repositories to obtain
    updates for packages already installed (see [issue #1](https://github.com/oracle/centos2ol/issues/1)).
+
+## Debugging
+Run `sudo bash -x centos2ol.sh` to switch your CentOS instance to Oracle Linux in a debug mode. This will print a trace of commands and their arguments or associated word lists after they are expanded but before they are executed.
 
 ## Get involved
 
