@@ -95,7 +95,7 @@ for pkg in rpm yum curl; do
 done
 
 echo "Checking your distribution..."
-if ! old_release=$(rpm -q --whatprovides redhat-release); then
+if ! old_release=$(rpm -q --whatprovides /etc/redhat-release); then
     exit_message "You appear to be running an unsupported distribution."
 fi
 
