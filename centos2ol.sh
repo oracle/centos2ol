@@ -87,11 +87,11 @@ reinstall_all_rpms=false
 
 verify_all_rpms=false
 
-while getopts "h:r:V" option; do
+while getopts "hr:V" option; do
     case "$option" in
         h) usage ;;
         r) reinstall_all_rpms=true ;;
-	V) verify_all_rpms=true ;;
+        V) verify_all_rpms=true ;;
         *) usage ;;
     esac
 done
