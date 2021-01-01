@@ -87,7 +87,7 @@ reinstall_all_rpms=false
 
 verify_all_rpms=false
 
-while getopts "hr:V" option; do
+while getopts "hrV" option; do
     case "$option" in
         h) usage ;;
         r) reinstall_all_rpms=true ;;
