@@ -61,17 +61,8 @@ exit_message() {
     exit 1
 } >&2
 
-restore_repos() {
-    yum remove -y "${new_releases[@]}"
-    find . -name 'repo.*' | while read -r repo; do
-        destination=$(head -n1 "$repo")
-        if [ "${destination}" ]; then
-            tail -n+2 "${repo}" > "${destination}"
-        fi
-    done
-    rm "${reposdir}/${repo_file}"
-    exit_message "Could not install Oracle Linux packages.
-Your repositories have been restored to your previous configuration."
+final_failure() {
+    echo "An error occurred while attempting to switch this system to Oracle Linux and it may be in an unstable/unbootable state. To avoid further issues, the script has terminated."
 }
 
 generate_rpms_info() {
@@ -331,7 +322,7 @@ if ! have_program yumdownloader; then
 fi
 
 cd "$(mktemp -d)"
-trap restore_repos ERR
+trap final_failure ERR
 
 # Most distros keep their /etc/yum.repos.d content in the -release rpm. CentOS 8 does not and the behaviour changes between
 #  minor releases; 8.0 uses 'centos-repos' while 8.3 uses 'centos-linux-repos', glob for simplicity.
