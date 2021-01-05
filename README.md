@@ -11,6 +11,11 @@ CentOS Linux 8. It does not support CentOS Stream.
 
 ## Before you switch
 
+**IMPORTANT:** this script is a work-in-progress and is not designed to handle
+all possible configurations. Please ensure you have a **complete backup** of the
+system _before_ you start this process in the event the script is unable to
+convert the system successfully.
+
 <details>
   <summary><strong>Remove all non-standard kernels</strong> i.e.  kernels that are not from either the CentOS <code>base</code> or <code>updates</code> repos. Click for more info.</summary>
 
@@ -39,7 +44,7 @@ CentOS Linux 8. It does not support CentOS Stream.
    Oracle Linux. This is not necessary for support and has no impact to a systems functionality
    but is offered so a user can remove CentOS GPG keys from the truststore.
    A list of all non-Oracle RPMs will be displayed after the reinstall process.
-   
+
 * `-V` Verify RPM information before and after the switch
 
    This option creates four output files:
