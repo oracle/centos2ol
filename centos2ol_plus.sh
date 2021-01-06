@@ -83,18 +83,16 @@ dep_check() {
     fi
 }
 
-restore_repos() {
-   # yum remove -y "${new_releases[@]}"
-   # find . -name 'repo.*' | while read -r repo; do
-   #     destination=$(head -n1 "$repo")
-   #     if [ "${destination}" ]; then
-   #         tail -n+2 "${repo}" > "${destination}"
-   #     fi
-   # done
-   # rm "${reposdir}/${repo_file}"
-   abend $LINENO "Could not install Oracle Linux packages."
-# Your repositories have been restored to your previous configuration."
+error_handler1() {
+   abend $LINENO "Error condition intercepted. Could not install Oracle Linux packages."
 }
+error_handler2() {
+   abend $1 "Error in executing yumdowloader"
+}
+error_handler3(){
+   abend $LINENO "Error dironmg execution of yum shell commands."
+}
+
 
 ## Start of script
 
@@ -339,7 +337,6 @@ if ! have_program yumdownloader; then
 fi
 
 cd "$(mktemp -d)"
-trap restore_repos ERR
 
 # Most distros keep their /etc/yum.repos.d content in the -release rpm. CentOS 8 does not and the behaviour changes between
 #  minor releases; 8.0 uses 'centos-repos' while 8.3 uses 'centos-linux-repos', glob for simplicity.
@@ -349,6 +346,7 @@ fi
 
 step_info $LINENO "Backing up and removing old repository files..."
 # Identify repo files from the base OS
+
 rpm -ql "$old_release" | grep '\.repo$' > repo_files
 # Identify repo files from 'CentOS extras'
 if [ "$(rpm -qa "centos-release-*" | wc -l)" -gt 0 ] ; then
@@ -369,6 +367,7 @@ EOF
 done < repo_files
 
 step_info $LINENO "Downloading Oracle Linux release package..."
+trap error_handler1 ERR
 if ! yumdownloader "${new_releases[@]}"; then
     {
         echo "Could not download the following packages from $yum_url:"
@@ -377,16 +376,15 @@ if ! yumdownloader "${new_releases[@]}"; then
         echo "Are you behind a proxy? If so, make sure the 'http_proxy' environment"
         echo "variable is set with your proxy address."
     } >&2
-    restore_repos
+    error_handler2
 fi
-
+trap - ERR
 step_info $LINENO "Switching old release package with Oracle Linux..."
 rpm -i --force "${new_releases[@]/%/*.rpm}"
 rpm -e --nodeps "$old_release" 
 rm -f "${reposdir}/switch-to-oraclelinux.repo"
 
-# At this point, the switch is completed.
-trap - ERR
+step_info $LINENO "At this point, the switch is completed the the release is switched"
 
 # When an additional enabled CentOS repository has a match with Oracle Linux
 #  then automatically enable the OL repository to ensure the RPM is maintained
@@ -456,6 +454,7 @@ for reponame in ${enabled_repos}; do
 done
 
 step_info $LINENO "Installing base packages for Oracle Linux..."
+trap error_handler3 ERR
 if ! yum shell -y <<EOF
 remove ${bad_packages[@]}
 install ${base_packages[@]}
@@ -464,8 +463,10 @@ EOF
 then
     abend $LINENO "Could not install base packages. Run 'yum distro-sync' to manually install them."
 fi
+trap - ERR
+
 if [ -x /usr/libexec/plymouth/plymouth-update-initrd ]; then
-    echo "Updating initrd..."
+    info $LINENO "Updating initrd..."
     /usr/libexec/plymouth/plymouth-update-initrd
 fi
 
@@ -473,7 +474,7 @@ step_info $LINENO "Switch successful. Syncing with Oracle Linux repositories."
 
 if ! yum -y distro-sync; then
     abend $LINENO "Could not automatically sync with Oracle Linux repositories.
-Check the output of 'yum distro-sync' to manually resolve the issue."
+Check the output of 'yum distro-sync' to manually resolve the issue. Do not try to rerun the script"
 fi
 
 # CentOS specific replacements
@@ -535,7 +536,7 @@ if "${reinstall_all_rpms}"; then
     fi
 fi
 
-step_info $LINENO "Sync successful. Switching default kernel to the UEK."
+step_info $LINENO "Yum repo sync successful. Switching default kernel to the UEK."
 
 arch=$(uname -m)
 uek_path=$(find /boot -name "vmlinuz-*.el${os_version}uek.${arch}")
@@ -561,4 +562,4 @@ esac
 step_info $LINENO "Removing yum cache"
 rm -rf /var/cache/{yum,dnf}
 
-step_info $LINENO "Switch complete. Oracle recommends rebooting this system."
+info $LINENO "Switch complete. Oracle recommends rebooting this system."
