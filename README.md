@@ -32,7 +32,7 @@ convert the system successfully.
 ## Usage
 
 1. Login to your CentOS Linux 6, 7 or 8 instance as a user who has `sudo` privileges.
-1. Either clone this repository or download the [`centos2ol.sh`](./centos2ol.sh) script.
+1. Either clone this repository or download the [`centos2ol.sh`][1] script.
 1. Run `sudo bash centos2ol.sh` to switch your CentOS instance to Oracle Linux.
 
 ### Usage options
@@ -89,3 +89,5 @@ For more information on Oracle Linux, please visit <https://www.oracle.com/linux
 Copyright (c) 2020 Oracle and/or its affiliates.
 
 Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
+
+[1]: https://raw.githubusercontent.com/oracle/centos2ol/main/centos2ol.sh
