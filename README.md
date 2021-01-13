@@ -16,12 +16,15 @@ all possible configurations. Please ensure you have a **complete backup** of the
 system _before_ you start this process in the event the script is unable to
 convert the system successfully.
 
-<details>
-  <summary><strong>Remove all non-standard kernels</strong> i.e.  kernels that are not from either the CentOS <code>base</code> or <code>updates</code> repos. Click for more info.</summary>
+### Remove all non-standard kernels
 
-  > Because of the [GRUB2 BootHole](https://blogs.oracle.com/linux/cve-2020-10713-grub2-boothole) vulnerability, our SecureBoot shim can only boot kernels signed by Oracle and we can only replace the default CentOS kernels. While this may not have an impact if SecureBoot is currently disabled, enabling it at a later date could render the system unbootable. For that reason, we strongly recommend removing all non-standard kernels which includes the [`centosplus`](https://wiki.centos.org/AdditionalResources/Repositories/CentOSPlus) kernels.
-
-</details>
+Because of the [GRUB2 BootHole][1] vulnerability, our SecureBoot shim can
+only boot kernels signed by Oracle and we can only replace the default
+CentOS kernels. While this may not have an impact if SecureBoot is currently
+disabled, enabling it at a later date could render the system unbootable.
+For that reason, we strongly recommend removing all non-standard kernels, i.e.
+any kernel that is installed that is _not_ provided by either the `base` or
+`updates` repo. This includes the [`centosplus`][2] kernels.
 
 1. Ensure your CentOS `yum` or `dnf` configuration is working, i.e. there are no
    stale repositories.
@@ -32,10 +35,11 @@ convert the system successfully.
 ## Usage
 
 1. Login to your CentOS Linux 6, 7 or 8 instance as a user who has `sudo` privileges.
-1. Either clone this repository or download the [`centos2ol.sh`](./centos2ol.sh) script.
+1. Either clone this repository or download the [`centos2ol.sh`][3] script.
 1. Run `sudo bash centos2ol.sh` to switch your CentOS instance to Oracle Linux.
 
 ### Usage options
+
 * `-r` Reinstalls all CentOS RPMs with Oracle Linux RPMs
 
    If a system is swiched to Oracle Linux and there is no newer Oracle Linux version
@@ -47,11 +51,12 @@ convert the system successfully.
 
 * `-V` Verify RPM information before and after the switch
 
-   This option creates four output files:
-   * sorted list of installed RPMs before the switch
-   * sorted list of installed RPMs after the switch
-   * result of verification of all installed RPMs against the RPM database before the switch
-   * result of verification of all installed RPMs against the RPM database after the switch
+  This option creates four output files in `/var/tmp/`:
+
+  * `${hostname}-rpms-list-[before|after].log`: a sorted list of installed
+    packages `before` and `after` the switch to Oracle Linux.
+  * `${hostname}-rpms-verified-[before|after].log`: the RPM verification results
+     for all installed packages `before` and `after` the switch to Oracle Linux.
 
 ## Limitations
 
@@ -66,26 +71,41 @@ convert the system successfully.
    commercial anti-virus products, may not work after switching.
 1. The script only enables the base repositories required to enable switching
    to Oracle Linux. Users may need to enable additional repositories to obtain
-   updates for packages already installed (see [issue #1](https://github.com/oracle/centos2ol/issues/1)).
+   updates for packages already installed (see [issue #1][4].
 
 ## Debugging
-Run `sudo bash -x centos2ol.sh` to switch your CentOS instance to Oracle Linux in debug mode. This will print a trace of commands and their arguments or associated word lists after they are expanded but before they are executed.
+
+Run `sudo bash -x centos2ol.sh` to switch your CentOS instance to Oracle Linux
+in debug mode. This will print a trace of commands and their arguments or
+associated word lists after they are expanded but before they are executed.
 
 ## Get involved
 
-We welcome contributions! See our [contribution guidelines](./CONTRIBUTING.md).
+We welcome contributions! See our [contribution guidelines][5].
 
 ## Support
 
-* Open a [GitHub issue](https://github.com/oracle/centos2ol/issues) for non-security related bug reports, questions, or requests for enhancements.
-* To report a security issue or vulnerability, please follow the [reporting security vulnerabilities](./SECURITY.md) instructions.
+* Open a [GitHub issue][6] for non-security related bug reports, questions, or
+  requests for enhancements.
+* To report a security issue or vulnerability, please follow the
+  [reporting security vulnerabilities][7] instructions.
 
 ## Resources
 
-For more information on Oracle Linux, please visit <https://www.oracle.com/linux>.
+For more information on Oracle Linux, please visit [oracle.com/linux][8].
 
 ## License
 
-Copyright (c) 2020 Oracle and/or its affiliates.
+Copyright (c) 2020, 2021 Oracle and/or its affiliates.
 
-Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
+Licensed under the Universal Permissive License v 1.0 as shown at
+<https://oss.oracle.com/licenses/upl/>
+
+[1]: https://blogs.oracle.com/linux/cve-2020-10713-grub2-boothole
+[2]: https://wiki.centos.org/AdditionalResources/Repositories/CentOSPlus
+[3]: https://raw.githubusercontent.com/oracle/centos2ol/main/centos2ol.sh
+[4]: https://github.com/oracle/centos2ol/issues/1
+[5]: ./CONTRIBUTING.md
+[6]: https://github.com/oracle/centos2ol/issues
+[7]: ./SECURITY.md
+[8]: https://www.oracle.com/linux
