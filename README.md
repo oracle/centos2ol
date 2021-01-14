@@ -58,6 +58,15 @@ any kernel that is installed that is _not_ provided by either the `base` or
   * `${hostname}-rpms-verified-[before|after].log`: the RPM verification results
      for all installed packages `before` and `after` the switch to Oracle Linux.
 
+## Known issues
+
+1. There is a [reported issue with the upstream OpenJDK][9] package resetting the
+   `alternatives` configuration during a `dnf reinstall` transaction.
+
+   We recommend recording the output of `alternatives --list` prior to running
+   `centos2ol.sh` and reviewing the same output after switching. If you experience
+   an issue with a package other than OpenJDK, please [open an issue][6]
+
 ## Limitations
 
 1. The script currently needs to be able communicate with the CentOS and Oracle
@@ -109,3 +118,4 @@ Licensed under the Universal Permissive License v 1.0 as shown at
 [6]: https://github.com/oracle/centos2ol/issues
 [7]: ./SECURITY.md
 [8]: https://www.oracle.com/linux
+[9]: https://bugzilla.redhat.com/show_bug.cgi?id=1200302
