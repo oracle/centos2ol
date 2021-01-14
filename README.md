@@ -58,6 +58,15 @@ any kernel that is installed that is _not_ provided by either the `base` or
   * `${hostname}-rpms-verified-[before|after].log`: the RPM verification results
      for all installed packages `before` and `after` the switch to Oracle Linux.
 
+## Known issues
+
+1. Some RPMs will be reinstalled during the switch process, this does not normally
+   cause problems but issues were reported with [OpenJDK][9] where the `alternatives`
+   configuration for java were reset to defaults.
+
+   We suggest you record the output of `alternatives --list` before switching
+   and use `alternatives set <name> <path>` to amend them after the switch is complete.
+
 ## Limitations
 
 1. The script currently needs to be able communicate with the CentOS and Oracle
@@ -109,3 +118,4 @@ Licensed under the Universal Permissive License v 1.0 as shown at
 [6]: https://github.com/oracle/centos2ol/issues
 [7]: ./SECURITY.md
 [8]: https://www.oracle.com/linux
+[9]: https://bugzilla.redhat.com/show_bug.cgi?id=1200302
