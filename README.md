@@ -60,12 +60,12 @@ any kernel that is installed that is _not_ provided by either the `base` or
 
 ## Known issues
 
-1. Some RPMs will be reinstalled during the switch process, this does not normally
-   cause problems but issues were reported with [OpenJDK][9] where the `alternatives`
-   configuration for java were reset to defaults.
+1. There is a [reported issue with the upstream OpenJDK][9] package resetting the
+   `alternatives` configuration during a `dnf reinstall` transaction.
 
-   We suggest you record the output of `alternatives --list` before switching
-   and use `alternatives set <name> <path>` to amend them after the switch is complete.
+   We recommend recording the output of `alternatives --list` prior to running
+   `centos2ol.sh` and reviewing the same output after switching. If you experience
+   an issue with a package other than OpenJDK, please [open an issue][6]
 
 ## Limitations
 
