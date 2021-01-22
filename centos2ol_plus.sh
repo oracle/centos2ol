@@ -3,9 +3,9 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
 # Script to switch CentOS (or other similar distribution) to the Oracle Linux yum repository.
-# with better diagnistics output formatting and restore_repos function converted to a dummy. 
+# with better diagnostics output formatting and restore_repos function converted to a dummy. 
 # 1.00  oracle  2020/12/28  Oracle initial implementation
-# 2.00  bezroun 2021/01/07  Some cosmetic changes and better diagnistic 
+# 2.00  bezroun 2021/01/07  Some cosmetic changes and better diagnostic plus a limited ability to restart from a certain step 
 
 
 set -e
