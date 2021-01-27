@@ -351,6 +351,12 @@ EOF
     fi
 done < repo_files
 
+# Disable the explicit distroverpkg as centos-release provides the correct value
+# for system-release(releasever).
+# See https://github.com/oracle/centos2ol/issues/53
+echo "Removing CentOS-specific yum configuration from /etc/yum.conf"
+sed -i.bak -e 's/^distroverpkg/#&/g' -e 's/^bugtracker_url/#&/g' /etc/yum.conf
+
 echo "Downloading Oracle Linux release package..."
 if ! yumdownloader "${new_releases[@]}"; then
     {
