@@ -27,8 +27,8 @@ CentOS Linux 8. It does not support CentOS Stream.
 
 **NOTES:** 
 
-1. You can use centos2ol_wrapper.sh script to automate checing of the speace prerequristes for /var and /boot. It also creates some useful backups which might help you to recover from the situation when the script did not finishes sucessfully and you will have semi-converted system. 
-2. Nothing can replace a full bare-metal backup of the system as a recovery tool.  For example, Relax-and-Recover
+1. You can use centos2ol_wrapper.sh script to automate checking of the space prerequisites for /var and /boot. It also creates some useful backups which might help you to recover from the situation when the script did not finishes successfully and you will have semi-converted system.
+2. Nothing can replace a full bare-metal backup of the system as a recovery tool.  For example, Relax-and-Recover (which is a tar based recovery tool) can be used for this purpose. 
 
 ## Usage
 
