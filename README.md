@@ -22,6 +22,7 @@ CentOS Linux 8. It does not support CentOS Stream.
    stale repositories.
 1. Disable all non-CentOS repositories. You can re-enable the repos after the switch.
 1. Ensure you have at least 5GB of free space in `/var/cache`.
+1. Ensure at least 100GB of free space in /boot if it is a separate partition
 1. All automatic updates, e.g. via `yum-cron` should be disabled.
 
 ## Usage
@@ -29,9 +30,10 @@ CentOS Linux 8. It does not support CentOS Stream.
 1. Login to your CentOS Linux 6, 7 or 8 instance as a user who has `sudo` privileges.
 1. Either clone this repository or download the [`centos2ol.sh`](./centos2ol.sh) script.
 1. Run `sudo bash centos2ol.sh` to switch your CentOS instance to Oracle Linux.
+1. If script aborts at some intermeduate step you need to analyse the situation and possibly correct the error.  If error occured on the step of installations of RPM you best option is to continue the process manually using the script as a templace of remaining actions to be done.  If the error occured becuase od lack of spaace in /boot you can try to rerun the script (it remebers the last step execured, but correctnss of operation is not garanteed. Which means that you need to check prepresities very carefully. 
 
 ### Usage options
-* `-r` Reinstalls all CentOS RPMs with Oracle Linux RPMs
+* `-r` Reinstalls all CentOS RPMs with Oracle Linux RPMs. Unless you have a very good connection and is pretty confident int he result it is better to do this as a separte step and not to mix apples with oranges. 
 
    If a system is swiched to Oracle Linux and there is no newer Oracle Linux version
    of a package already installed then the CentOS version remains.
@@ -40,7 +42,7 @@ CentOS Linux 8. It does not support CentOS Stream.
    but is offered so a user can remove CentOS GPG keys from the truststore.
    A list of all non-Oracle RPMs will be displayed after the reinstall process.
    
-* `-V` Verify RPM information before and after the switch
+* `-V` Verify RPM information before and after the switch. 
 
    This option creates four output files:
    * sorted list of installed RPMs before the switch
