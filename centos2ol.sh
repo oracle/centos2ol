@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # Copyright (c) 2020-2021 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
@@ -130,6 +130,10 @@ function data_dump
 }
 
 ## Start of the script
+if (( $(id -u) > 0 )); then
+   abend $LINENO "You must run this script as root. You can try running sudo $0  or su -c $0 , if you want to start it from a regular account"
+fi
+
 if [[ -d $BASE ]]; then 
    info $LINENO "ATTENTION: the directory BASE exists, so we assume that you are re-rerunning the conversion after an error"
    if [[ -f $BASE/data_dump ]]; then 
@@ -138,11 +142,14 @@ if [[ -d $BASE ]]; then
       fi
       . $BASE/data_dump
       STARTNO=`cat $BASE/laststep`
-      info $LINENO "ATTENTION: the directory BASE exists, so we assume that you are re-rerunning the conversion after an error from step $STARNO" 
-      echo "Correct execution is not garanteered. Cancel in 10 sec "
+      info $LINENO "ATTENTION: Attempting to continue from step $STARNO. If you want a different step please correct $BASE/laststep and re-run the script" 
+      echo "Correct execution is not garanteered. You can cancel the script within the next 10 sec "
       sleep 10
    else
-      mkdir BASE
+      mkdir -p BASE
+      if [[ ! -d $BASE ]]; then 
+         abend $LINENO "Can't create the directory $BASE"
+      fi   
    fi  
 fi
   
@@ -156,11 +163,6 @@ while getopts "h:r" option; do
         *) usage ;;
     esac
 done
-
-if (( $(id -u) > 0 )); then
-    abend $LINENO "You must run this script as root.
-Try running 'su -c ${0}'."
-fi
 
 step_info $LINENO "Checking for required packages..."
 if (( STEPNO >= STARTNO  )) ; then
