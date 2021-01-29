@@ -25,7 +25,7 @@ CentOS Linux 8. It does not support CentOS Stream.
 1. Ensure at least 100GB of free space in /boot if it is a separate partition
 1. All automatic updates, e.g. via `yum-cron` should be disabled.
 
-NOTES: 
+**NOTES:** 
 
 1. You can use centos2ol_wrapper.sh script to automate checing of the speace prerequristes for /var and /boot. It also creates some useful backups which might help you to recover from the situation when the script did not finishes sucessfully and you will have semi-converted system. 
 2. Nothing can replace a full bare-metal backup of the system as a recovery tool.  For example, Relax-and-Recover
