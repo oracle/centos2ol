@@ -366,7 +366,7 @@ if ! yumdownloader "${new_releases[@]}"; then
         echo "Are you behind a proxy? If so, make sure the 'http_proxy' environment"
         echo "variable is set with your proxy address."
     } >&2
-    restore_repos
+    final_failure
 fi
 
 echo "Switching old release package with Oracle Linux..."
