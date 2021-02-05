@@ -153,9 +153,9 @@ declare -A packages_to_replace=(
 )
 # Switch RPMs if they're installed
 for package_name in "${!packages_to_replace[@]}"; do
-    if [ "$(rpm -q ${package_name})" ]; then
+    if rpm -q "${package_name}" ; then
         bad_packages+=("${package_name}")
-        new_releases+=("${packages_to_replace[${package_name}]}")
+        base_packages+=("${packages_to_replace[${package_name}]}")
     fi
 done
 
