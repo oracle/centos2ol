@@ -401,7 +401,7 @@ case "$os_version" in
     7*)
         declare -A repositories=(
             [base-debuginfo]="REPO https://oss.oracle.com/ol7/debuginfo/"
-            [updates]="REPO ol7_latest"
+            [updates]="REPO ol7_latest,ol7_optional_latest"
             [centos-ceph-jewel]="RPM oracle-ceph-release-el7"
             [centos-gluster41]="RPM oracle-gluster-release-el7"
             [centos-gluster5]="RPM oracle-gluster-release-el7"
