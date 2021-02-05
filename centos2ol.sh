@@ -469,22 +469,6 @@ fi
 
 echo "Switch successful. Syncing with Oracle Linux repositories."
 
-# It's possible that we had the same package in bad_packages (remove) and base_packages (install).
-# In this case yum/dnf will remove the package. To catch this we'll look for duplicates and perform
-# a second install
-for add_package in "${base_packages[@]}"; do
-    for remove_package in "${bad_packages[@]}"; do
-        if [[ ${add_package} == "${remove_package}" ]]; then
-            second_install_packages+=("${add_package}")
-        fi
-    done
-done
-if [ ${#second_install_packages[@]} -gt 0 ]; then
-    if ! yum -y install "${second_install_packages[@]}"; then
-        exit_message "Could not install packages: ${second_install_packages[*]}"
-        fi
-fi
-
 if ! yum -y distro-sync; then
     exit_message "Could not automatically sync with Oracle Linux repositories.
 Check the output of 'yum distro-sync' to manually resolve the issue."
