@@ -125,6 +125,7 @@ case "${old_release}" in
 esac
 
 os_version=$(rpm -q "${old_release}" --qf "%{version}")
+major_os_version=${os_version:0:1}
 base_packages=(basesystem initscripts oracle-logos)
 case "$os_version" in
     8*)
@@ -148,7 +149,7 @@ esac
 # Some packages need to be replaced as part of switch
 # Store as key value, if the first RPM is found then it's removed and the associated RPM installed
 declare -A packages_to_replace=(
-    [epel-release]="oracle-epel-release-el${os_version}"
+    [epel-release]="oracle-epel-release-el${major_os_version}"
 )
 # Switch RPMs if they're installed
 for package_name in "${!packages_to_replace[@]}"; do
