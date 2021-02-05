@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2020 Oracle and/or its affiliates.
+# Copyright (c) 2020, 2021 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
 # Script to switch CentOS (or other similar distribution) to the
@@ -145,11 +145,19 @@ case "$os_version" in
     *) exit_message "You appear to be running an unsupported distribution." ;;
 esac
 
-# Replace EPEL configuration, if it exists
-if [ "$(rpm --quiet -q epel-release)" ]; then
-    bad_packages+=(epel-release)
-    new_releases+=("oracle-epel-release-el${old_version}")
-fi
+# Some packages need to be replaced as part of switch
+# Store as key value, if the first RPM is found then it's removed and the associated RPM installed
+declare -A packages_to_replace=(
+    [epel-release]="oracle-epel-release-el${old_version}"
+    [tkinter]="tkinter"     # CentOS 7 version has hardcoded dependancy, remove and reinstall later
+)
+# Switch RPMs if they're installed
+for package_name in "${!packages_to_replace[@]}"; do
+    if [ "$(rpm -q ${package_name})" ]; then
+        bad_packages+=("${package_name}")
+        new_releases+=("${packages_to_replace[${package_name}]}")
+    fi
+done
 
 
 echo "Checking for yum lock..."
