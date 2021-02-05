@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2020 Oracle and/or its affiliates.
+# Copyright (c) 2020, 2021 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
 # Script to switch CentOS (or other similar distribution) to the
@@ -125,6 +125,7 @@ case "${old_release}" in
 esac
 
 os_version=$(rpm -q "${old_release}" --qf "%{version}")
+major_os_version=${os_version:0:1}
 base_packages=(basesystem initscripts oracle-logos)
 case "$os_version" in
     8*)
@@ -145,11 +146,18 @@ case "$os_version" in
     *) exit_message "You appear to be running an unsupported distribution." ;;
 esac
 
-# Replace EPEL configuration, if it exists
-if [ "$(rpm --quiet -q epel-release)" ]; then
-    bad_packages+=(epel-release)
-    new_releases+=("oracle-epel-release-el${old_version}")
-fi
+# Some packages need to be replaced as part of switch
+# Store as key value, if the first RPM is found then it's removed and the associated RPM installed
+declare -A packages_to_replace=(
+    [epel-release]="oracle-epel-release-el${major_os_version}"
+)
+# Switch RPMs if they're installed
+for package_name in "${!packages_to_replace[@]}"; do
+    if rpm -q "${package_name}" ; then
+        bad_packages+=("${package_name}")
+        base_packages+=("${packages_to_replace[${package_name}]}")
+    fi
+done
 
 
 echo "Checking for yum lock..."
@@ -393,7 +401,7 @@ case "$os_version" in
     7*)
         declare -A repositories=(
             [base-debuginfo]="REPO https://oss.oracle.com/ol7/debuginfo/"
-            [updates]="REPO ol7_latest"
+            [updates]="REPO ol7_latest,ol7_optional_latest"
             [centos-ceph-jewel]="RPM oracle-ceph-release-el7"
             [centos-gluster41]="RPM oracle-gluster-release-el7"
             [centos-gluster5]="RPM oracle-gluster-release-el7"
