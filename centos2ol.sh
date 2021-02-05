@@ -474,7 +474,7 @@ echo "Switch successful. Syncing with Oracle Linux repositories."
 # a second install
 for add_package in "${base_packages[@]}"; do
     for remove_package in "${bad_packages[@]}"; do
-        if ${add_package} == "${remove_package}"; then
+        if [[ ${add_package} == "${remove_package}" ]]; then
             second_install_packages+=("${add_package}")
         fi
     done
