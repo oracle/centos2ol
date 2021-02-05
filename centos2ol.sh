@@ -149,7 +149,6 @@ esac
 # Store as key value, if the first RPM is found then it's removed and the associated RPM installed
 declare -A packages_to_replace=(
     [epel-release]="oracle-epel-release-el${os_version}"
-    [tkinter]="tkinter"     # CentOS 7 version has hardcoded dependancy, remove and reinstall later
 )
 # Switch RPMs if they're installed
 for package_name in "${!packages_to_replace[@]}"; do
