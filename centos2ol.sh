@@ -37,6 +37,8 @@ usage() {
     echo "OPTIONS"
     echo "-h"
     echo "        Display this help and exit"
+    echo "-k"
+    echo "        Do not install the UEK kernel and disable UEK repos"
     echo "-r"
     echo "        Reinstall all CentOS RPMs with Oracle Linux RPMs"
     echo "        Note: This is not necessary for support"
@@ -78,10 +80,13 @@ reinstall_all_rpms=false
 
 verify_all_rpms=false
 
-while getopts "hrV" option; do
+install_uek_kernel=true
+
+while getopts "hrkV" option; do
     case "$option" in
         h) usage ;;
         r) reinstall_all_rpms=true ;;
+        k) install_uek_kernel=false ;;
         V) verify_all_rpms=true ;;
         *) usage ;;
     esac
@@ -126,22 +131,27 @@ esac
 
 os_version=$(rpm -q "${old_release}" --qf "%{version}")
 major_os_version=${os_version:0:1}
-base_packages=(basesystem initscripts oracle-logos)
+if "${install_uek_kernel}"; then
+  base_packages=(basesystem initscripts oracle-logos kernel-uek)
+else
+  base_packages=(basesystem initscripts oracle-logos)
+fi
+
 case "$os_version" in
     8*)
         repo_file=public-yum-ol8.repo
         new_releases=(oraclelinux-release oraclelinux-release-el8 redhat-release)
-        base_packages=("${base_packages[@]}" plymouth grub2 grubby kernel-uek)
+        base_packages=("${base_packages[@]}" plymouth grub2 grubby)
         ;;
     7*)
         repo_file=public-yum-ol7.repo
         new_releases=(oraclelinux-release oraclelinux-release-el7 redhat-release-server)
-        base_packages=("${base_packages[@]}" plymouth grub2 grubby kernel-uek)
+        base_packages=("${base_packages[@]}" plymouth grub2 grubby)
         ;;
     6*)
         repo_file=public-yum-ol6.repo
         new_releases=(oraclelinux-release oraclelinux-release-el6 redhat-release-server)
-        base_packages=("${base_packages[@]}" oraclelinux-release-notes plymouth grub grubby kernel-uek)
+        base_packages=("${base_packages[@]}" oraclelinux-release-notes plymouth grub grubby)
         ;;
     *) exit_message "You appear to be running an unsupported distribution." ;;
 esac
@@ -311,7 +321,6 @@ EOF
         ;;
 esac
 
-
 echo "Looking for yumdownloader..."
 if ! have_program yumdownloader; then
     # CentOS 6 mirrors are now offline, if yumdownloader tool is not present then
@@ -381,6 +390,12 @@ echo "Switching old release package with Oracle Linux..."
 rpm -i --force "${new_releases[@]/%/*.rpm}"
 rpm -e --nodeps "$old_release"
 rm -f "${reposdir}/switch-to-oraclelinux.repo"
+
+# Disable UEK repos if UEK kernel is not being installed
+if ! "${install_uek_kernel}"; then
+  echo "Disabling UEK repositories since we are not installing the UEK kernel"
+  yum-config-manager --disable \*UEK*
+fi
 
 # At this point, the switch is completed.
 trap - ERR
@@ -533,28 +548,30 @@ if "${reinstall_all_rpms}"; then
     fi
 fi
 
-echo "Sync successful. Switching default kernel to the UEK."
+if "${install_uek_kernel}"; then
+  echo "Sync successful. Switching default kernel to the UEK."
 
-arch=$(uname -m)
-uek_path=$(find /boot -name "vmlinuz-*.el${os_version}uek.${arch}")
+  arch=$(uname -m)
+  uek_path=$(find /boot -name "vmlinuz-*.el${os_version}uek.${arch}")
 
-case "$os_version" in
-    7* | 8*)
-        # Installing current latest kernel-uek on current latest CentOS 8.3 will
-        #  cause a dracut coredump during the posttrans scriptlet leaving a system unbootable.
-        #  Cause not investigated but for a temporary workaround, reinstall kernel-uek now that we have OL userland
-        yum reinstall -y kernel-uek
-        if [ -d /sys/firmware/efi ]; then
-            grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg
-        else
-            grub2-mkconfig -o /boot/grub2/grub.cfg
-        fi
-        grubby --set-default="${uek_path}"
-        ;;
-    6*)
-        grubby --set-default="${uek_path}"
-        ;;
-esac
+  case "$os_version" in
+      7* | 8*)
+          # Installing current latest kernel-uek on current latest CentOS 8.3 will
+          #  cause a dracut coredump during the posttrans scriptlet leaving a system unbootable.
+          #  Cause not investigated but for a temporary workaround, reinstall kernel-uek now that we have OL userland
+          yum reinstall -y kernel-uek
+          if [ -d /sys/firmware/efi ]; then
+              grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg
+          else
+              grub2-mkconfig -o /boot/grub2/grub.cfg
+          fi
+          grubby --set-default="${uek_path}"
+          ;;
+      6*)
+          grubby --set-default="${uek_path}"
+          ;;
+  esac
+fi
 
 echo "Removing yum cache"
 rm -rf /var/cache/{yum,dnf}
