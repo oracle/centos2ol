@@ -58,6 +58,36 @@ any kernel that is installed that is _not_ provided by either the `base` or
   * `${hostname}-rpms-verified-[before|after].log`: the RPM verification results
      for all installed packages `before` and `after` the switch to Oracle Linux.
 
+## Testing
+
+### Prerequisites
+
+You'll need to install [shellcheck by yourself](https://github.com/koalaman/shellcheck#installing). If `shellcheck` is in your `PATH`, everything will simply work.
+
+### Style Tests
+
+Shell (shellcheck) and Ruby (rubocop):
+```bash
+$ bundle exec rake style
+```
+
+Shell (shellcheck):
+```bash
+$ bundle exec rake style:shell
+```
+
+Ruby (rubocop):
+```bash
+$ bundle exec rake style:ruby
+```
+
+### Integration Tests
+
+Kitchen-Vagrant (Inspec):
+```bash
+$ bundle exec rake integration:vagrant:test
+```
+
 ## Known issues
 
 1. There is a [reported issue with the upstream OpenJDK][9] package resetting the
