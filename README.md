@@ -49,6 +49,10 @@ any kernel that is installed that is _not_ provided by either the `base` or
    but is offered so a user can remove CentOS GPG keys from the truststore.
    A list of all non-Oracle RPMs will be displayed after the reinstall process.
 
+* `-k` Do not install the UEK kernel and disable UEK repos
+
+  This option will not install the UEK kernel and will disable all UEK yum repositories.
+
 * `-V` Verify RPM information before and after the switch
 
   This option creates four output files in `/var/tmp/`:
