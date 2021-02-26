@@ -62,6 +62,11 @@ any kernel that is installed that is _not_ provided by either the `base` or
   * `${hostname}-rpms-verified-[before|after].log`: the RPM verification results
      for all installed packages `before` and `after` the switch to Oracle Linux.
 
+## Testing
+
+See [`TESTING.md`](./TESTING.md) for instructions on the available tests and
+how to run them.
+
 ## Known issues
 
 1. There is a [reported issue with the upstream OpenJDK][9] package resetting the
