@@ -64,33 +64,8 @@ any kernel that is installed that is _not_ provided by either the `base` or
 
 ## Testing
 
-### Prerequisites
-
-You'll need to install [shellcheck by yourself](https://github.com/koalaman/shellcheck#installing). If `shellcheck` is in your `PATH`, everything will simply work.
-
-### Style Tests
-
-Shell (shellcheck) and Ruby (rubocop):
-```bash
-$ bundle exec rake style
-```
-
-Shell (shellcheck):
-```bash
-$ bundle exec rake style:shell
-```
-
-Ruby (rubocop):
-```bash
-$ bundle exec rake style:ruby
-```
-
-### Integration Tests
-
-Kitchen-Vagrant (Inspec):
-```bash
-$ bundle exec rake integration:vagrant:test
-```
+See [`TESTING.md`](./TESTING.md) for instructions on the available tests and
+how to run them.
 
 ## Known issues
 
