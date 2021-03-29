@@ -431,9 +431,13 @@ case "$os_version" in
     8*)
         declare -A repositories=(
             [AppStream]="REPO ol8_appstream"
+            [appstream]="REPO ol8_appstream"
             [BaseOS]="REPO ol8_baseos_latest"
+            [baseos]="REPO ol8_baseos_latest"
             [HighAvailability]="REPO ol8_addons"
+            [ha]="REPO ol8_addons"
             [PowerTools]="REPO ol8_codeready_builder"
+            [powertools]="REPO ol8_codeready_builder"
             [centos-release-nfs-ganesha28]="RPM oracle-gluster-release-el8"
             [centos-gluster6-test]="RPM oracle-gluster-release-el8"
             [centos-gluster7]="RPM oracle-gluster-release-el8"
