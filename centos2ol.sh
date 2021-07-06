@@ -552,29 +552,27 @@ if "${reinstall_all_rpms}"; then
     fi
 fi
 
+
+echo "Sync successful."
+
+case "$os_version" in
+    7* | 8*)
+        echo "Updating the GRUB2 bootloader."
+        if [ -d /sys/firmware/efi ]; then
+            grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg
+        else
+            grub2-mkconfig -o /boot/grub2/grub.cfg
+        fi
+    ;;
+esac
+
+
+
 if "${install_uek_kernel}"; then
-  echo "Sync successful. Switching default kernel to the UEK."
-
-  arch=$(uname -m)
-  uek_path=$(find /boot -name "vmlinuz-*.el${os_version}uek.${arch}")
-
-  case "$os_version" in
-      7* | 8*)
-          # Installing current latest kernel-uek on current latest CentOS 8.3 will
-          #  cause a dracut coredump during the posttrans scriptlet leaving a system unbootable.
-          #  Cause not investigated but for a temporary workaround, reinstall kernel-uek now that we have OL userland
-          yum reinstall -y kernel-uek
-          if [ -d /sys/firmware/efi ]; then
-              grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg
-          else
-              grub2-mkconfig -o /boot/grub2/grub.cfg
-          fi
-          grubby --set-default="${uek_path}"
-          ;;
-      6*)
-          grubby --set-default="${uek_path}"
-          ;;
-  esac
+    echo "Switching default boot kernel to the UEK."
+    arch=$(uname -m)
+    uek_path=$(find /boot -name "vmlinuz-*.el${os_version}uek.${arch}")
+    grubby --set-default="${uek_path}"
 fi
 
 echo "Removing yum cache"
