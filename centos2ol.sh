@@ -547,10 +547,18 @@ if "${reinstall_all_rpms}"; then
     # If CentOS and Oracle Linux have identically versioned RPMs then those RPMs are left unchanged.
     #  This should have no technical impact but for completeness, reinstall these RPMs
     #  so there is no accidental cross pollination.
-    mapfile -t list_of_centos_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE} %{VENDOR}\n" | grep CentOS | awk '{print $1}')
-    if [[ -n "${list_of_centos_rpms[*]}" ]]; then
+    case "$arch" in
+        x86_64)
+            mapfile -t list_of_centos_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE} %{VENDOR}\n" | grep CentOS |  awk '{print $1}')
+            ;;
+        aarch64)
+            mapfile -t list_of_centos_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE} %{VENDOR}\n" | grep CentOS | grep -v kernel | awk '{print $1}')
+            ;;
+    esac
+
+    if [[ -n "${list_of_centos_rpms[*]}" ]] && [[ "${list_of_centos_rpms[*]}" -ne 0 ]]; then
         echo "Reinstalling RPMs: ${list_of_centos_rpms[*]}"
-        yum --assumeyes --disablerepo "*" --enablerepo "ol*" --exclude "kernel-*" reinstall "${list_of_centos_rpms[@]}"
+        yum --assumeyes --disablerepo "*" --enablerepo "ol*" reinstall "${list_of_centos_rpms[@]}"
     fi
     # See if non-Oracle RPMs are present and print them
     mapfile -t non_oracle_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE}|%{VENDOR}|%{PACKAGER}\n" |grep -v Oracle)
