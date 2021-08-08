@@ -70,7 +70,7 @@ final_failure() {
 
 generate_rpms_info() {
     echo "Creating a list of RPMs installed $1 the switch"
-    rpm -qa --qf "%{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}\n" | sort > "/var/tmp/$(hostname)-rpms-list-$1.log"
+    rpm -qa --qf "%{NAME}-%{EPOCH}:%{VERSION}-%{RELEASE}.%{ARCH}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}\n" | sed 's/(none)://g' | sort > "/var/tmp/$(hostname)-rpms-list-$1.log"
     echo "Verifying RPMs installed $1 the switch against RPM database"
     rpm -Va | sort -k3 > "/var/tmp/$(hostname)-rpms-verified-$1.log"
 }
