@@ -4,17 +4,21 @@ This script is designed to automatically switch a CentOS instance to Oracle Linu
 by removing any CentOS-specific packages or replacing them with the Oracle Linux
 equivalent.
 
-## Supported versions
+## Supported versions and architectures
 
 This script currently supports switching CentOS Linux 6, CentOS Linux 7 and
-CentOS Linux 8. It does not support CentOS Stream.
+CentOS Linux 8 on both `x86_64` and `aarch64` architectures. It does **not** support CentOS Stream.
 
-## Before you switch
+> Support for switching `aarch64` hosts should be considered **experimental**
+> due to limited testing. Please ensure you have a **complete _working_ backup** before attempting
+> to switch and [report any issues][6] you encounter during the process.
+
+## Before you start
 
 **IMPORTANT:** this script is a work-in-progress and is not designed to handle
-all possible configurations. Please ensure you have a **complete backup** of the
-system _before_ you start this process in the event the script is unable to
-convert the system successfully.
+all possible configurations. Please ensure you have a **complete working backup**
+of the system _before_ you start this process in the event the script is unable to
+convert the system successfully or unable to rollback the changes it made.
 
 ### Remove all non-standard kernels
 
