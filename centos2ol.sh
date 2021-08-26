@@ -11,7 +11,8 @@ unset CDPATH
 
 yum_url=https://yum.oracle.com
 github_url=https://github.com/oracle/centos2ol/
-bad_packages=(centos-backgrounds centos-logos centos-release centos-release-cr desktop-backgrounds-basic \
+arch=$(uname -m)
+bad_packages=(centos-backgrounds centos-gpg-keys centos-logos centos-release centos-release-cr desktop-backgrounds-basic \
               centos-release-advanced-virtualization centos-release-ansible26 centos-release-ansible-27 \
               centos-release-ansible-28 centos-release-ansible-29 centos-release-azure \
               centos-release-ceph-jewel centos-release-ceph-luminous centos-release-ceph-nautilus \
@@ -69,7 +70,7 @@ final_failure() {
 
 generate_rpms_info() {
     echo "Creating a list of RPMs installed $1 the switch"
-    rpm -qa --qf "%{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}\n" | sort > "/var/tmp/$(hostname)-rpms-list-$1.log"
+    rpm -qa --qf "%{NAME}-%{EPOCH}:%{VERSION}-%{RELEASE}.%{ARCH}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}\n" | sed 's/(none)://g' | sort > "/var/tmp/$(hostname)-rpms-list-$1.log"
     echo "Verifying RPMs installed $1 the switch against RPM database"
     rpm -Va | sort -k3 > "/var/tmp/$(hostname)-rpms-verified-$1.log"
 }
@@ -91,6 +92,11 @@ while getopts "hrkV" option; do
         *) usage ;;
     esac
 done
+
+# Force the UEK on Arm hosts
+if [ "$arch" == "aarch64" ]; then
+    install_uek_kernel=true
+fi
 
 if [ "$(id -u)" -ne 0 ]; then
     exit_message "You must run this script as root.
@@ -303,13 +309,17 @@ case "$os_version" in
 		gpgcheck=1
 		enabled=1
 
-		[ol8_UEKR6]
-		name=Latest Unbreakable Enterprise Kernel Release 6 for Oracle Linux $releasever ($basearch)
-		baseurl=https://yum.oracle.com/repo/OracleLinux/OL8/UEKR6/$basearch/
-		gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
-		gpgcheck=1
-		enabled=1
 EOF
+        if [ "$arch" == "x86_64" ]; then
+            cat >> "switch-to-oraclelinux.repo" <<-'EOF'
+    		[ol8_UEKR6]
+		    name=Latest Unbreakable Enterprise Kernel Release 6 for Oracle Linux $releasever ($basearch)
+		    baseurl=https://yum.oracle.com/repo/OracleLinux/OL8/UEKR6/$basearch/
+		    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+		    gpgcheck=1
+		    enabled=1
+EOF
+        fi
         ;;
     *)
         echo "Downloading Oracle Linux yum repository file..."
@@ -537,8 +547,16 @@ if "${reinstall_all_rpms}"; then
     # If CentOS and Oracle Linux have identically versioned RPMs then those RPMs are left unchanged.
     #  This should have no technical impact but for completeness, reinstall these RPMs
     #  so there is no accidental cross pollination.
-    mapfile -t list_of_centos_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE} %{VENDOR}\n" | grep CentOS | awk '{print $1}')
-    if [[ -n "${list_of_centos_rpms[*]}" ]]; then
+    case "$arch" in
+        x86_64)
+            mapfile -t list_of_centos_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE} %{VENDOR}\n" | grep CentOS |  awk '{print $1}')
+            ;;
+        aarch64)
+            mapfile -t list_of_centos_rpms < <(rpm -qa --qf "%{NAME}-%{VERSION}-%{RELEASE} %{VENDOR}\n" | grep CentOS | grep -v kernel | awk '{print $1}')
+            ;;
+    esac
+
+    if [[ -n "${list_of_centos_rpms[*]}" ]] && [[ "${list_of_centos_rpms[*]}" -ne 0 ]]; then
         echo "Reinstalling RPMs: ${list_of_centos_rpms[*]}"
         yum --assumeyes --disablerepo "*" --enablerepo "ol*" reinstall "${list_of_centos_rpms[@]}"
     fi
@@ -555,6 +573,14 @@ fi
 
 echo "Sync successful."
 
+if [ "$arch" == "aarch64" ]; then
+    echo "Host is running an Arm CPU: removing RHCK."
+    echo "Important: you MUST reboot this instance as soon as possible."
+    dnf config-manager --setopt=protect_running_kernel=0 --save
+    dnf -y remove kernel kernel-core kernel-modules
+    dnf config-manager --setopt=protect_running_kernel=1 --save
+fi
+
 case "$os_version" in
     7* | 8*)
         echo "Updating the GRUB2 bootloader."
@@ -566,11 +592,8 @@ case "$os_version" in
     ;;
 esac
 
-
-
 if "${install_uek_kernel}"; then
     echo "Switching default boot kernel to the UEK."
-    arch=$(uname -m)
     uek_path=$(find /boot -name "vmlinuz-*.el${os_version}uek.${arch}")
     grubby --set-default="${uek_path}"
 fi
@@ -585,4 +608,13 @@ if "${verify_all_rpms}"; then
     find /var/tmp/ -type f -name "$(hostname)-rpms-*.log"
 fi
 
-echo "Switch complete. Oracle recommends rebooting this system."
+echo "Switch complete."
+
+case "$arch" in
+    "x86_64")
+        echo "Oracle recommends rebooting this system."
+    ;;
+    "aarch64")
+        echo "This instance must be rebooted as soon as possible."
+    ;;
+esac
