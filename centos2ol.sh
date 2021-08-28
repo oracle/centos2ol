@@ -313,11 +313,11 @@ EOF
         if [ "$arch" == "x86_64" ]; then
             cat >> "switch-to-oraclelinux.repo" <<-'EOF'
     		[ol8_UEKR6]
-		    name=Latest Unbreakable Enterprise Kernel Release 6 for Oracle Linux $releasever ($basearch)
-		    baseurl=https://yum.oracle.com/repo/OracleLinux/OL8/UEKR6/$basearch/
-		    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
-		    gpgcheck=1
-		    enabled=1
+		name=Latest Unbreakable Enterprise Kernel Release 6 for Oracle Linux $releasever ($basearch)
+		baseurl=https://yum.oracle.com/repo/OracleLinux/OL8/UEKR6/$basearch/
+		gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+		gpgcheck=1
+		enabled=1
 EOF
         fi
         ;;
