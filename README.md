@@ -46,7 +46,7 @@ any kernel that is installed that is _not_ provided by either the `base` or
 
 * `-r` Reinstalls all CentOS RPMs with Oracle Linux RPMs
 
-   If a system is swiched to Oracle Linux and there is no newer Oracle Linux version
+   If a system is switched to Oracle Linux and there is no newer Oracle Linux version
    of a package already installed then the CentOS version remains.
    This option proceeds to reinstall any CentOS RPM with an identical version from
    Oracle Linux. This is not necessary for support and has no impact to a systems functionality
