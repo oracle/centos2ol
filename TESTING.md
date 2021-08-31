@@ -3,7 +3,7 @@
 Any new functionality added to `centos2.ol.sh` should include an update to the
 test framework for that functionality.
 
-## Prequisites
+## Prerequisites
 
 The following tools must be installed before running any tests:
 
