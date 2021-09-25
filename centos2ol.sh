@@ -362,7 +362,6 @@ if [[ $old_release =~ ^rocky-release-8.* ]]; then
     old_release=$(rpm -qa rocky*repos)
 fi
 
-set -x
 echo "Backing up and removing old repository files..."
 # Identify repo files from the base OS
 rpm -ql "$old_release" | grep '\.repo$' > repo_files
@@ -384,7 +383,7 @@ EOF
         rm "$repo"
     fi
 done < repo_files
-set +x
+
 # Disable the explicit distroverpkg as centos-release provides the correct value
 # for system-release(releasever).
 # See https://github.com/oracle/centos2ol/issues/53
