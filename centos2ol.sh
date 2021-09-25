@@ -369,7 +369,6 @@ rpm -ql "$old_release" | grep '\.repo$' > repo_files
 if [ "$(rpm -qa "centos-release-*" | wc -l)" -gt 0 ] ; then
     rpm -qla "centos-release-*" | grep '\.repo$' >> repo_files
 fi
-
 while read -r repo; do
     if [ -f "$repo" ]; then
         cat - "$repo" > "$repo".disabled <<EOF
