@@ -30,7 +30,7 @@ bad_packages=(centos-backgrounds centos-gpg-keys centos-logos centos-release cen
               centos-release-virt-common centos-release-xen centos-release-xen-410 \
               centos-release-xen-412 centos-release-xen-46 centos-release-xen-48 centos-release-xen-common \
               libreport-centos libreport-plugin-mantisbt libreport-plugin-rhtsupport python3-syspurpose \
-              python-oauth sl-logos yum-rhn-plugin)
+              python-oauth rocky-backgrounds rocky-gpg-keys rocky-logos rocky-release sl-logos yum-rhn-plugin)
 
 usage() {
     echo "Usage: ${0##*/} [OPTIONS]"
@@ -128,6 +128,7 @@ fi
 case "${old_release}" in
     redhat-release*) ;;
     centos-release* | centos-linux-release*) ;;
+    rocky-release*) ;;
     sl-release*) ;;
     oraclelinux-release*|enterprise-release*)
         exit_message "You appear to be already running Oracle Linux."
@@ -356,7 +357,12 @@ trap final_failure ERR
 if [[ $old_release =~ ^centos-release-8.* ]] || [[ $old_release =~ ^centos-linux-release-8.* ]]; then
     old_release=$(rpm -qa centos*repos)
 fi
+# Most distros keep their /etc/yum.repos.d content in the -release rpm. Rocky Linux 8 does not.
+if [[ $old_release =~ ^rocky-release-8.* ]]; then
+    old_release=$(rpm -qa rocky*repos)
+fi
 
+set -x
 echo "Backing up and removing old repository files..."
 # Identify repo files from the base OS
 rpm -ql "$old_release" | grep '\.repo$' > repo_files
@@ -364,6 +370,7 @@ rpm -ql "$old_release" | grep '\.repo$' > repo_files
 if [ "$(rpm -qa "centos-release-*" | wc -l)" -gt 0 ] ; then
     rpm -qla "centos-release-*" | grep '\.repo$' >> repo_files
 fi
+
 while read -r repo; do
     if [ -f "$repo" ]; then
         cat - "$repo" > "$repo".disabled <<EOF
@@ -377,7 +384,7 @@ EOF
         rm "$repo"
     fi
 done < repo_files
-
+set +x
 # Disable the explicit distroverpkg as centos-release provides the correct value
 # for system-release(releasever).
 # See https://github.com/oracle/centos2ol/issues/53
