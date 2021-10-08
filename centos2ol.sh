@@ -513,16 +513,16 @@ case "$os_version" in
         ;;
     8*)
         # There are a few dnf modules that are named after the distribution
-        #  for each steam named 'rhel' or 'rhel8' perform a module reset and install
+        #  for each steam named 'rhel' or 'rhel8' perform a module reset and enable
         if [[ "${modules_enabled[*]}" ]]; then
             for module in "${modules_enabled[@]}"; do
                 dnf module reset -y "${module}"
                 case ${module} in
                 container-tools|go-toolset|jmc|llvm-toolset|rust-toolset)
-                    dnf module install -y "${module}":ol8
+                    dnf module enable -y "${module}":ol8
                     ;;
                 virt)
-                    dnf module install -y "${module}":ol
+                    dnf module enable -y "${module}":ol
                     ;;
                 *)
                     echo "Unsure how to transform module ${module}"
