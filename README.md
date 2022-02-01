@@ -9,9 +9,9 @@ equivalent.
 This script currently supports switching CentOS Linux 6, CentOS Linux 7,
 CentOS Linux 8, and Rocky Linux on both `x86_64` and `aarch64` architectures. It does **not** support CentOS Stream.
 
-> Support for switching Rocky Linux should be considered **experimental** due to limited testing. Likewise, switching any of the 
+> Support for switching Rocky Linux should be considered **experimental** due to limited testing. Likewise, switching any of the
 > operating systems mentioned above on `aarch64` hosts should be considered **experimental**.
-> 
+>
 > Please ensure you have a **complete _working_ backup** before attempting
 > to switch and [report any issues][6] you encounter during the process.
 
@@ -21,6 +21,10 @@ CentOS Linux 8, and Rocky Linux on both `x86_64` and `aarch64` architectures. It
 all possible configurations. Please ensure you have a **complete working backup**
 of the system _before_ you start this process in the event the script is unable to
 convert the system successfully or unable to rollback the changes it made.
+
+**NOTE**: CentOS 8 has reached end-of-life and its repos have moved to `vault.centos.org`.
+Please ensure that your CentOS 8 system is up-to-date and able to access those
+repos before you start.
 
 ### Remove all non-standard kernels
 
