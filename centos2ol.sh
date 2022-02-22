@@ -127,7 +127,7 @@ fi
 
 case "${old_release}" in
     redhat-release*) ;;
-    centos-release* | centos-linux-release*) ;;
+    centos-release* | centos-linux-release* | centos-stream-release*) ;;
     rocky-release*) ;;
     sl-release*) ;;
     oraclelinux-release*|enterprise-release*)
@@ -354,7 +354,7 @@ trap final_failure ERR
 
 # Most distros keep their /etc/yum.repos.d content in the -release rpm. CentOS 8 does not and the behaviour changes between
 #  minor releases; 8.0 uses 'centos-repos' while 8.3 uses 'centos-linux-repos', glob for simplicity.
-if [[ $old_release =~ ^centos-release-8.* ]] || [[ $old_release =~ ^centos-linux-release-8.* ]]; then
+if [[ $old_release =~ ^centos-release-8.* ]] || [[ $old_release =~ ^centos-linux-release-8.* ]] || [[ $old_release =~ ^centos-stream-release-8.* ]]; then
     old_release=$(rpm -qa centos*repos)
 fi
 # Most distros keep their /etc/yum.repos.d content in the -release rpm. Rocky Linux 8 does not.
