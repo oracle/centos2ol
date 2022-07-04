@@ -561,7 +561,7 @@ if "${reinstall_all_rpms}"; then
             ;;
     esac
 
-    if [[ -n "${list_of_centos_rpms[*]}" ]] && [[ "${list_of_centos_rpms[*]}" -ne 0 ]]; then
+    if [[ -n "${list_of_centos_rpms[*]}" ]] && [[ "${#list_of_centos_rpms[@]}" -ne 0 ]]; then
         echo "Reinstalling RPMs: ${list_of_centos_rpms[*]}"
         yum --assumeyes --disablerepo "*" --enablerepo "ol*" reinstall "${list_of_centos_rpms[@]}"
     fi
