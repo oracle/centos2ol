@@ -16,7 +16,7 @@ Instead, please follow the instructions provided for [reporting security vulnera
 We welcome your code contributions. Before you submit a fix or enhancement, please
 open an issue first so that we can discuss the nature of the contribution first.
 
-You will also need to sign the [Oracle Contributor Agreement](https://www.oracle.com/technetwork/community/oca-486395.html) (OCA)
+You will also need to sign the [Oracle Contributor Agreement](https://oca.opensource.oracle.com) (OCA)
 before we can accept any code contribution.
 
 For pull requests to be accepted, the bottom of your commit message must have
