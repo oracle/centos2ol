@@ -145,6 +145,11 @@ else
 fi
 
 case "$os_version" in
+    9*)
+	repo_file=public-yum-ol9.repo
+	new_releases=(oraclelinux-release oraclelinux-release-el9 redhat-release)
+	base_packages=("${base_packages[@]}" plymouth grub2 grubby)
+	;;
     8*)
         repo_file=public-yum-ol8.repo
         new_releases=(oraclelinux-release oraclelinux-release-el8 redhat-release)
@@ -189,7 +194,7 @@ fi
 
 echo "Checking for required python packages..."
 case "$os_version" in
-    8*)
+    8* | 9* )
         dep_check /usr/libexec/platform-python
         ;;
     *)
@@ -238,7 +243,7 @@ fi
 
 echo "Finding your repository directory..."
 case "$os_version" in
-    8*)
+    8* | 9* )
 reposdir=$(/usr/libexec/platform-python -c "
 import dnf
 import os
@@ -263,7 +268,7 @@ esac
 
 echo "Learning which repositories are enabled..."
 case "$os_version" in
-    8*)
+    8* | 9* )
         enabled_repos=$(/usr/libexec/platform-python -c "
 import dnf
 
@@ -294,6 +299,36 @@ cd "$reposdir"
 # No https://yum.oracle.com/public-yum-ol8.repo file exists
 # Download the content for 6 and 7 based systems and directly enter the content for 8 based systems
 case "$os_version" in
+
+
+    9*)
+         cat > "switch-to-oraclelinux.repo" <<-'EOF'
+		[ol9_baseos_latest]
+		name=Oracle Linux 9 BaseOS Latest ($basearch)
+		baseurl=https://yum.oracle.com/repo/OracleLinux/OL9/baseos/latest/$basearch/
+		gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+		gpgcheck=1
+		enabled=1
+
+		[ol9_appstream]
+		name=Oracle Linux 9 Application Stream ($basearch)
+		baseurl=https://yum.oracle.com/repo/OracleLinux/OL9/appstream/$basearch/
+		gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+		gpgcheck=1
+		enabled=1
+
+EOF
+        if [ "$arch" == "x86_64" ]; then
+            cat >> "switch-to-oraclelinux.repo" <<-'EOF'
+    		[ol9_UEKR7]
+		name=Latest Unbreakable Enterprise Kernel Release 7 for Oracle Linux $releasever ($basearch)
+		baseurl=https://yum.oracle.com/repo/OracleLinux/OL9/UEKR7/$basearch/
+		gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+		gpgcheck=1
+		enabled=1
+EOF
+        fi
+        ;;
     8*)
         cat > "switch-to-oraclelinux.repo" <<-'EOF'
 		[ol8_baseos_latest]
@@ -358,7 +393,7 @@ if [[ $old_release =~ ^centos-release-8.* ]] || [[ $old_release =~ ^centos-linux
     old_release=$(rpm -qa centos*repos)
 fi
 # Most distros keep their /etc/yum.repos.d content in the -release rpm. Rocky Linux 8 does not.
-if [[ $old_release =~ ^rocky-release-8.* ]]; then
+if [[ $old_release =~ ^rocky-release-*.* ]]; then
     old_release=$(rpm -qa rocky*repos)
 fi
 
@@ -443,6 +478,16 @@ case "$os_version" in
             [centos-sclo-rh]="RPM oracle-softwarecollection-release-el7"
         )
         ;;
+
+    9*)
+        declare -A repositories=(
+	    [AppStream]="REPO ol9_appstream"
+            [appstream]="REPO ol9_appstream"
+            [BaseOS]="REPO ol9_baseos_latest"
+            [baseos]="REPO ol9_baseos_latest"
+	)
+	;;
+
     8*)
         declare -A repositories=(
             [AppStream]="REPO ol8_appstream"
@@ -587,7 +632,7 @@ if [ "$arch" == "aarch64" ]; then
 fi
 
 case "$os_version" in
-    7* | 8*)
+    7* | 8* | 9* )
         echo "Updating the GRUB2 bootloader."
         if [ -d /sys/firmware/efi ]; then
             grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg
