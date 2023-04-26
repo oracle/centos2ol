@@ -1,13 +1,14 @@
-# Switch from CentOS to Oracle Linux
+# Switch from CentOS/Rocky Linux to Oracle Linux
 
-This script is designed to automatically switch a CentOS instance to Oracle Linux
-by removing any CentOS-specific packages or replacing them with the Oracle Linux
+This script is designed to automatically switch a CentOS or Rocky Linux instance to Oracle Linux
+by removing any distribution-specific packages or replacing them with the Oracle Linux
 equivalent.
 
 ## Supported versions and architectures
 
 This script currently supports switching CentOS Linux 6, CentOS Linux 7,
-CentOS Linux 8, and Rocky Linux on both `x86_64` and `aarch64` architectures. It does **not** support CentOS Stream.
+CentOS Linux 8, Rocky Linux 8 and Rocky Linux 9 on both `x86_64` and `aarch64` architectures. 
+It does **not** support CentOS Stream.
 
 > Support for switching Rocky Linux should be considered **experimental** due to limited testing. Likewise, switching any of the
 > operating systems mentioned above on `aarch64` hosts should be considered **experimental**.
@@ -44,7 +45,8 @@ any kernel that is installed that is _not_ provided by either the `base` or
 
 ## Usage
 
-1. Login to your CentOS Linux 6, 7 or 8 instance as a user who has `sudo` privileges.
+1. Login to your CentOS Linux 6, 7 or 8 or Rocky Linux 8 or 9 instance as a user 
+   who has `sudo` privileges.
 1. Either clone this repository or download the [`centos2ol.sh`][3] script.
 1. Run `sudo bash centos2ol.sh` to switch your CentOS instance to Oracle Linux.
 
@@ -88,7 +90,7 @@ how to run them.
 
 ## Limitations
 
-1. The script currently needs to be able communicate with the CentOS and Oracle
+1. The script currently needs to be able communicate with the CentOS/Rocky and Oracle
    Linux yum repositories either directly or via a proxy.
 1. The script currently does not support instances that are registered to a
    third-party management tool like Spacewalk, Foreman or Uyuni.
