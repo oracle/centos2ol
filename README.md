@@ -13,7 +13,7 @@ It does **not** support CentOS Stream.
 > Support for switching Rocky Linux should be considered **experimental** due to limited testing. Likewise, switching any of the
 > operating systems mentioned above on `aarch64` hosts should be considered **experimental**.
 >
-> The script does not support the switch of Rocky Linux images built for Raspberry Pi (aarch64).
+> The script does not support switching from Rocky Linux images built for Raspberry Pi (aarch64).
 >
 > Please ensure you have a **complete _working_ backup** before attempting
 > to switch and [report any issues][6] you encounter during the process.
